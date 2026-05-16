@@ -59,14 +59,14 @@
 - (void)setupToggleButton {
     // Buat tombol native iOS agar 100% bisa diklik tanpa masalah hitTest
     self.toggleButton = [UIButton buttonWithType:UIButtonTypeCustom];
-    self.toggleButton.frame = CGRectMake(20, self.bounds.size.height - 120, 80, 80);
+    self.toggleButton.frame = CGRectMake(20, self.bounds.size.height - 80, 50, 50);
     self.toggleButton.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
-    self.toggleButton.layer.cornerRadius = 40;
-    self.toggleButton.layer.borderWidth = 2;
+    self.toggleButton.layer.cornerRadius = 25;
+    self.toggleButton.layer.borderWidth = 1.5;
     self.toggleButton.layer.borderColor = [UIColor whiteColor].CGColor;
     [self.toggleButton setTitle:@"CBZ" forState:UIControlStateNormal];
     [self.toggleButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
-    self.toggleButton.titleLabel.font = [UIFont boldSystemFontOfSize:20];
+    self.toggleButton.titleLabel.font = [UIFont boldSystemFontOfSize:14];
     
     [self.toggleButton addTarget:self action:@selector(onToggleClicked) forControlEvents:UIControlEventTouchUpInside];
     [self addSubview:self.toggleButton];
@@ -80,7 +80,7 @@
 - (void)layoutSubviews {
     [super layoutSubviews];
     self.mtkView.frame = self.bounds;
-    self.toggleButton.frame = CGRectMake(20, self.bounds.size.height - 120, 80, 80);
+    self.toggleButton.frame = CGRectMake(20, self.bounds.size.height - 80, 50, 50);
 }
 
 - (void)setupImGui {
@@ -90,10 +90,11 @@
     
     ImGui::StyleColorsDark();
     
-    // Scale ImGui for iOS Retina Displays agar tidak terlalu kecil
+    // Scale ImGui for iOS Retina Displays agar tidak terlalu kecil (tapi jangan terlalu besar)
     CGFloat scale = [UIScreen mainScreen].scale;
-    ImGui::GetStyle().ScaleAllSizes(scale);
-    io.FontGlobalScale = scale * 0.8f; // Besarkan font secara proporsional
+    // Gunakan nilai tengah agar UI seimbang (1.5x) daripada skala penuh retina (3x) yang kebesaran
+    ImGui::GetStyle().ScaleAllSizes(1.5f);
+    io.FontGlobalScale = 1.3f; // Besarkan font secukupnya
     
     ImGui_ImplMetal_Init(self.device);
     
@@ -174,6 +175,9 @@
         // Render UI
         ShowMenu();
         RenderRetriDot();
+        
+        // Sinkronisasi status tombol toggle native setiap frame
+        self.toggleButton.hidden = bShowMenu;
         
         // Render ESP jika data valid
         if (g_Battle.isValid) {
