@@ -20,6 +20,12 @@ void* MemoryThread(void* arg) {
     }
     NSLog(@"[Cheat] Il2Cpp Attached Successfully!");
     
+    // SANGAT PENTING: Tunggu game sampai benar-benar masuk ke menu/loading screen
+    // Jika kita memanggil Il2CppGetStaticFieldValue terlalu cepat, Unity akan mencoba
+    // menginisialisasi BattleManager sebelum engine siap, yang menyebabkan EXC_BAD_ACCESS (Crash).
+    NSLog(@"[Cheat] Waiting 15 seconds for Unity engine to boot...");
+    sleep(15);
+    
     while(true) {
         void* bmInst = nullptr;
         void* logicBmInst = nullptr;
