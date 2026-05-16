@@ -223,6 +223,14 @@
         // Panggil ESP Core (hanya jika fitur aktif)
         if (g_Battle.isValid) {
             SyncFeatureToESP();
+            
+            // --- AUTO DETECT SAFE AREA (NOTCH) ---
+            UIEdgeInsets safeArea = self.safeAreaInsets;
+            // Tambahkan otomatis safeArea.left ke X Offset, dan safeArea.top ke Y Offset
+            // Ini akan otomatis menggeser ESP jika iPhone memiliki Poni/Dynamic Island di kiri/atas
+            g_ESPCfg.ScreenOffsetX += safeArea.left;
+            g_ESPCfg.ScreenOffsetY += safeArea.top;
+            
             RenderESPCore();
         }
         
