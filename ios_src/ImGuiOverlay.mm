@@ -176,13 +176,27 @@
         RenderRetriDot();
         
         // Sinkronisasi status tombol toggle native setiap frame
-        self.toggleButton.hidden = bShowMenu;
+        // Panggil Menu UI
+        RenderMenu();
         
-        // Render ESP jika data valid
+        // DEBUG TEXT DI LAYAR
+        char debugStr[512];
+        snprintf(debugStr, sizeof(debugStr), "DEBUG:\nBattleState: %d\nbmInst: %p\nlogicBmInst: %p\ndicPlayerOff: 0x%zx\ndicPlayerPtr: 0x%lx\nHeroes: %zu / count: %d\nMonsters: %zu", 
+                 g_Battle.dbg_battleState, (void*)g_Battle.dbg_bmInst, (void*)g_Battle.dbg_logicBmInst,
+                 g_Battle.dbg_dicPlayerOff, g_Battle.dbg_dicPlayerPtr,
+                 g_Battle.heroes_render.size(), g_Battle.dbg_dicPlayerCount,
+                 g_Battle.monsters_render.size());
+                 
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(50, 50), IM_COL32(0, 255, 0, 255), debugStr);
+        
+        // Panggil ESP Core (hanya jika fitur aktif)
         if (g_Battle.isValid) {
             SyncFeatureToESP();
             RenderESPCore();
         }
+        
+        // Sinkronisasi status tombol toggle native setiap frame
+        self.toggleButton.hidden = bShowMenu;
         
         ImGui::Render();
         ImDrawData *draw_data = ImGui::GetDrawData();

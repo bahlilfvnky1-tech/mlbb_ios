@@ -203,6 +203,14 @@ struct BattleState {
     bool isValid = false;
     uint64_t curFrame = 0;
     
+    // Debug Info
+    uintptr_t dbg_bmInst = 0;
+    uintptr_t dbg_logicBmInst = 0;
+    int dbg_battleState = -1;
+    size_t dbg_dicPlayerOff = 0;
+    uintptr_t dbg_dicPlayerPtr = 0;
+    int dbg_dicPlayerCount = 0;
+    
     std::mutex m_mutex;
 
     // Fast copy for rendering to avoid locking during DrawList
@@ -254,7 +262,10 @@ struct BattleState {
         }
 
         // ---- Read ShowPlayers via m_dicPlayerShow (Persis seperti Code Breaker) ----
-        uintptr_t dicPlayersPtr = ReadPtr(bmPtr + Get_dicPlayerShow_Offset());
+        size_t offset_dicPlayer = Get_dicPlayerShow_Offset();
+        uintptr_t dicPlayersPtr = ReadPtr(bmPtr + offset_dicPlayer);
+        int parsedPlayersCount = 0;
+        
         if (dicPlayersPtr && dicPlayersPtr > 0x100000000ULL) {
             uintptr_t entries = ReadPtr(dicPlayersPtr + 0x18);
             int32_t dicCount = ReadInt32(dicPlayersPtr + 0x20); // Count
@@ -262,6 +273,7 @@ struct BattleState {
                 dicCount = ReadInt32(dicPlayersPtr + 0x40); // Alternatif di versi Unity berbeda
             }
             if (entries && dicCount > 0 && dicCount <= 50) {
+                parsedPlayersCount = dicCount;
                 for (int i = 0; i < dicCount; i++) {
                     // Entry = 24 bytes (int hashCode, int next, int key, padding, uintptr_t value)
                     // Offset array header = 0x20
@@ -510,6 +522,11 @@ struct BattleState {
             localCamp = t_localCamp;
             heroes = std::move(tempHeroes);
             monsters = std::move(tempMonsters);
+            
+            dbg_dicPlayerOff = offset_dicPlayer;
+            dbg_dicPlayerPtr = dicPlayersPtr;
+            dbg_dicPlayerCount = parsedPlayersCount;
+            
             isValid = true;
         }
     }

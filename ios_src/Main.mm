@@ -48,6 +48,10 @@ void* MemoryThread(void* arg) {
             }
         }
         
+        g_Battle.dbg_bmInst = (uintptr_t)bmInst;
+        g_Battle.dbg_logicBmInst = (uintptr_t)logicBmInst;
+        g_Battle.dbg_battleState = battleState;
+
         // Kembalikan ke logika Code Breaker asli:
         // Harus mengecek battleState == 2 || battleState == 3 (berarti sedang dalam match/room)
         if (bmInst && logicBmInst && (battleState == 2 || battleState == 3)) {
