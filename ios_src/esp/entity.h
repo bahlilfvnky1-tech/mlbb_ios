@@ -85,6 +85,40 @@ struct EntityData {
 };
 
 // ============================================================
+//  CODE BREAKER MONSTER FILTER
+// ============================================================
+inline std::string MonsterToString(int m_id) {
+    std::string strMonster;
+    switch(m_id) {
+    case 2002: strMonster = "Lord"; break;
+    case 2003: strMonster = "Turtle"; break;
+    case 2004: strMonster = "Fiend"; break;
+    case 2005: strMonster = "Serpent"; break;
+    case 2006: strMonster = "Scaled Lizard"; break;
+    case 2008: strMonster = "Crammer 1"; break;
+    case 2009: strMonster = "Rockursa"; break;
+    case 2011: strMonster = "Crab"; break;
+    case 2012: strMonster = "Serpent kids"; break;
+    case 2013: strMonster = "Crab"; break;
+    case 2056: strMonster = "Lithowanderer 1"; break;
+    case 2059: strMonster = "Crammer 2"; break;
+    case 2072: strMonster = "Lithowanderer 2"; break;
+    case 2220: strMonster = "Elemental Lord"; break;
+    case 2221: strMonster = "Dragon Turtle"; break;
+    case 2222: strMonster = "Molten Fiend"; break;
+    case 2223: strMonster = "Thunder Fenrir"; break;
+    case 2224: strMonster = "Horned Lizard"; break;
+    case 2225: strMonster = "Fire Beetle"; break;
+    case 2226: strMonster = "Lava Golem"; break;
+    case 2227: strMonster = "Scavenger Crab"; break;
+    case 2228: strMonster = "Little Thunder Fenrir"; break;
+    case 2230: strMonster = "Lithowanderer"; break;
+    default: return ""; // Jika tidak terdaftar, abaikan
+    }
+    return strMonster;
+}
+
+// ============================================================
 //  ENTITY READER
 //  Membaca data dari pointer ShowEntity/ShowPlayer
 // ============================================================
@@ -319,13 +353,17 @@ struct BattleState {
                 for (int i = 0; i < size; i++) {
                     uintptr_t entityPtr = m_ShowMonsters->items->vector[i];
                     if (!entityPtr) continue;
+                    
+                    int entityId = ReadInt32(entityPtr + OFF_SE_ID);
+                    if (MonsterToString(entityId) == "") continue; // FILTER!
+                    
                     EntityData e;
                     e.ptr = entityPtr;
                     EntityReader::ReadBase(e);
                     e.isMonster = true;
                     if (e.isBoss) e.type = EntityType::Boss;
                     else e.type = EntityType::Monster;
-                    EntityReader::ReadMonsterName(e);
+                    e.name = MonsterToString(e.entityId);
                     tempMonsters.push_back(e);
                 }
             }
@@ -342,6 +380,10 @@ struct BattleState {
                 if (entry.hashCode < 0) continue;
                 uintptr_t entityPtr = entry.value;
                 if (!entityPtr || entityPtr < 0x100000000ULL) continue;
+                
+                int entityId = ReadInt32(entityPtr + OFF_SE_ID);
+                if (MonsterToString(entityId) == "") continue; // FILTER!
+                
                 // Dedup
                 bool dup = false;
                 for (auto& m : tempMonsters) {
@@ -354,7 +396,7 @@ struct BattleState {
                     e.isMonster = true;
                     if (e.isBoss) e.type = EntityType::Boss;
                     else e.type = EntityType::Monster;
-                    EntityReader::ReadMonsterName(e);
+                    e.name = MonsterToString(e.entityId);
                     tempMonsters.push_back(e);
                 }
             }

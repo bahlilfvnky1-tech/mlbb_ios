@@ -194,13 +194,15 @@
                  "entries: 0x%lx (maxLen: %d)\n"
                  "1stEntity: 0x%lx\n"
                  "Heroes: %zu / count: %d\n"
-                 "Monsters: %zu", 
+                 "Monsters: %zu\n"
+                 "LocalCamp: %d | Camera: %p", 
                  g_Battle.dbg_battleState, (void*)g_Battle.dbg_bmInst, (void*)g_Battle.dbg_logicBmInst,
                  g_Battle.dbg_dicPlayerOff, g_Battle.dbg_dicPlayerPtr,
                  g_Battle.dbg_entriesPtr, g_Battle.dbg_entriesMaxLen,
                  g_Battle.dbg_firstEntityPtr,
                  g_Battle.heroes_render.size(), g_Battle.dbg_dicPlayerCount,
-                 g_Battle.monsters_render.size());
+                 g_Battle.monsters_render.size(),
+                 g_Battle.localCamp, GetCameraMain());
                  
         ImGui::GetBackgroundDrawList()->AddText(ImVec2(50, 50), IM_COL32(0, 255, 0, 255), debugStr);
         
