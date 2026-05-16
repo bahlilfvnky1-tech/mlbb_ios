@@ -1,7 +1,8 @@
 #pragma once
-#include <string>
 #include <vector>
+#include <string>
 #include <mutex>
+#include "../Il2CppResolver.h"
 #include "../memory_internal.h"
 #include "offsets.h"
 #include "game_math.h"
@@ -210,8 +211,6 @@ struct BattleState {
         heroes_render = heroes;
         monsters_render = monsters;
     }
-
-#include "../Il2CppResolver.h"
 
     // Offset Cache
     size_t Get_dicPlayerShow_Offset() {
