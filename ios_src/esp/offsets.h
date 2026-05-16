@@ -121,12 +121,20 @@ inline void* Get_ShowEntity_get_position() {
 inline size_t Get_SE_LogicFighter_Offset() {
     static size_t off = 0;
     if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_logicFighter"); }
+    if (off == 0) { off = FindFieldContaining("Assembly-CSharp.dll", "", "ShowEntity", "fighter"); }
     return off;
 }
 
 inline size_t Get_LogicEntity_Position_Offset() {
     static size_t off = 0;
     if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "Battle", "LogicEntity", "m_Position"); }
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "LogicEntity", "m_Position"); }
+    // Coba FindFieldContaining di kedua namespace
+    if (off == 0) { off = FindFieldContaining("Assembly-CSharp.dll", "Battle", "LogicEntity", "position"); }
+    if (off == 0) { off = FindFieldContaining("Assembly-CSharp.dll", "", "LogicEntity", "position"); }
+    // Fallback ke LogicFighter
+    if (off == 0) { off = FindFieldContaining("Assembly-CSharp.dll", "Battle", "LogicFighter", "position"); }
+    if (off == 0) { off = FindFieldContaining("Assembly-CSharp.dll", "", "LogicFighter", "position"); }
     return off;
 }
 

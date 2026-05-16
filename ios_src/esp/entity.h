@@ -275,6 +275,7 @@ struct BattleState {
     size_t dbg_offLogicPos = 0;
     size_t dbg_offCachePos = 0;
     size_t dbg_offPos = 0;
+    bool dbg_isLogicEntityFound = false;
     
     std::mutex m_mutex;
 
@@ -330,6 +331,7 @@ struct BattleState {
         dbg_offLogicPos = Get_LogicEntity_Position_Offset();
         dbg_offCachePos = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition");
         dbg_offPos = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position");
+        dbg_isLogicEntityFound = (Il2CppGetClassType("Assembly-CSharp.dll", "Battle", "LogicEntity") != nullptr);
 
         // ============================================================
         // Read Players via m_dicPlayerShow - PERSIS CODE BREAKER

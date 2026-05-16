@@ -204,9 +204,9 @@
                  g_Battle.monsters_render.size(),
                  g_Battle.localCamp, GetCameraMain());
         char extraStr[256] = "";
-        snprintf(extraStr, sizeof(extraStr), "\nOffLogicF: 0x%zx | OffLogPos: 0x%zx\nOffCacheP: 0x%zx | OffPos: 0x%zx", 
+        snprintf(extraStr, sizeof(extraStr), "\nOffLogicF: 0x%zx | OffLogPos: 0x%zx\nOffCacheP: 0x%zx | OffPos: 0x%zx\nLogicEntityFound: %d", 
                  g_Battle.dbg_offLogicFighter, g_Battle.dbg_offLogicPos,
-                 g_Battle.dbg_offCachePos, g_Battle.dbg_offPos);
+                 g_Battle.dbg_offCachePos, g_Battle.dbg_offPos, g_Battle.dbg_isLogicEntityFound);
         
         char enemyStr[256] = "";
         if (!g_Battle.heroes_render.empty()) {
@@ -224,6 +224,36 @@
         if (g_Battle.isValid) {
             SyncFeatureToESP();
             RenderESPCore();
+            
+            // --- MEMORY DUMPER FOR LOGICFIGHTER ---
+            if (!g_Battle.heroes_render.empty()) {
+                ImGui::SetNextWindowSize(ImVec2(400, 500), ImGuiCond_FirstUseEver);
+                if (ImGui::Begin("LogicFighter Memory Dump", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
+                    for (auto& e : g_Battle.heroes_render) {
+                        if (e.isSelf || e.camp == g_Battle.localCamp) { // Dump local player
+                            uintptr_t p = e.ptr;
+                            size_t offLogicFighter = Get_SE_LogicFighter_Offset();
+                            if (offLogicFighter != 0) {
+                                uintptr_t pLogicFighter = ReadPtr(p + offLogicFighter);
+                                if (pLogicFighter) {
+                                    ImGui::Text("Local Player LogicFighter: 0x%zx", pLogicFighter);
+                                    ImGui::Separator();
+                                    // Dump offset 0x20 to 0x100
+                                    for (size_t off = 0x20; off < 0x140; off += 4) {
+                                        int val = ReadInt32(pLogicFighter + off);
+                                        // Only show values that look like VInt3 coordinates (large integers)
+                                        // Usually positions are like 10000 to 50000 for x/z
+                                        ImGui::Text("Offset 0x%02zx : %d", off, val);
+                                    }
+                                }
+                            }
+                            break; // only dump one
+                        }
+                    }
+                }
+                ImGui::End();
+            }
+            // --------------------------------------
         }
         
         // Sinkronisasi status tombol toggle native setiap frame

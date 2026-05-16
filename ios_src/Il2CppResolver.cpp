@@ -13,6 +13,8 @@ extern "C" {
     void *(*il2cpp_class_get_field_from_name)(void *klass, const char *name) = nullptr;
     void *(*il2cpp_class_get_method_from_name)(void *klass, const char *name, int argsCount) = nullptr;
     void *(*il2cpp_class_get_parent)(void *klass) = nullptr;
+    void *(*il2cpp_class_get_fields)(void *klass, void* *iter) = nullptr;
+    const char *(*il2cpp_field_get_name)(void *field) = nullptr;
     size_t (*il2cpp_field_get_offset)(void *field) = nullptr;
     void (*il2cpp_field_static_get_value)(void *field, void *value) = nullptr;
     void (*il2cpp_field_static_set_value)(void *field, void *value) = nullptr;
@@ -44,6 +46,8 @@ bool Il2CppAttach() {
     il2cpp_class_get_field_from_name = (void *(*)(void *, const char *)) dlsym(handle, "il2cpp_class_get_field_from_name");
     il2cpp_class_get_method_from_name = (void *(*)(void *, const char *, int)) dlsym(handle, "il2cpp_class_get_method_from_name");
     il2cpp_class_get_parent = (void *(*)(void *)) dlsym(handle, "il2cpp_class_get_parent");
+    il2cpp_class_get_fields = (void *(*)(void *, void **)) dlsym(handle, "il2cpp_class_get_fields");
+    il2cpp_field_get_name = (const char *(*)(void *)) dlsym(handle, "il2cpp_field_get_name");
     il2cpp_field_get_offset = (size_t (*)(void *)) dlsym(handle, "il2cpp_field_get_offset");
     il2cpp_field_static_get_value = (void (*)(void *, void *)) dlsym(handle, "il2cpp_field_static_get_value");
     il2cpp_field_static_set_value = (void (*)(void *, void *)) dlsym(handle, "il2cpp_field_static_set_value");
@@ -119,6 +123,31 @@ size_t Il2CppGetFieldOffset(const char *image, const char *namespaze, const char
     
     if (il2cpp_field_get_offset) {
         return il2cpp_field_get_offset(field);
+    }
+    return 0;
+}
+
+size_t FindFieldContaining(const char *image, const char *namespaze, const char *clazz, const char *searchStr) {
+    if (!il2cpp_class_get_fields || !il2cpp_field_get_name || !il2cpp_field_get_offset) return 0;
+    
+    void *klass = Il2CppGetClassType(image, namespaze, clazz);
+    if (!klass) return 0;
+    
+    while (klass != nullptr) {
+        void* iter = nullptr;
+        void* field = il2cpp_class_get_fields(klass, &iter);
+        while (field != nullptr) {
+            const char* name = il2cpp_field_get_name(field);
+            if (name && strcasestr(name, searchStr)) {
+                return il2cpp_field_get_offset(field);
+            }
+            field = il2cpp_class_get_fields(klass, &iter);
+        }
+        if (il2cpp_class_get_parent) {
+            klass = il2cpp_class_get_parent(klass);
+        } else {
+            break;
+        }
     }
     return 0;
 }
