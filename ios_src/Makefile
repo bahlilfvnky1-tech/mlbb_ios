@@ -23,7 +23,7 @@ SRC = Main.mm \
 all: $(TARGET)
 
 $(TARGET): $(SRC)
-	$(CXX) $(CXXFLAGS) -dynamiclib -o $@ $^ -framework Foundation -framework UIKit -framework Metal -framework MetalKit
+	$(CXX) $(CXXFLAGS) -dynamiclib -o $@ $^ -framework Foundation -framework UIKit -framework Metal -framework MetalKit -framework CoreGraphics
 	@echo "Build success! Output: $(TARGET)"
 
 clean:
