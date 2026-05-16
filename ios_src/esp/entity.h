@@ -211,6 +211,8 @@ struct BattleState {
         monsters_render = monsters;
     }
 
+#include "../Il2CppResolver.h"
+
     // Offset Cache
     size_t Get_dicPlayerShow_Offset() {
         static size_t off = 0;
@@ -244,6 +246,7 @@ struct BattleState {
         std::vector<EntityData> tempHeroes;
         std::vector<EntityData> tempMonsters;
         
+        uint64_t t_curFrame = Read<uint64_t>(bmPtr + OFF_BM_CUR_FRAME);
         uintptr_t t_localPlayerPtr = ReadPtr(bmPtr + Get_LocalPlayerShow_Offset());
         int32_t t_localCamp = 0;
         
