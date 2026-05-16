@@ -6,6 +6,18 @@ typedef unsigned int GLuint;
 
 extern GLuint GetHeroIcon(int heroId);
 
+inline void RenderESPCore() {
+    // Dummy implementasi untuk iOS sampai offset matriks ditemukan
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+    ImGuiIO& io = ImGui::GetIO();
+    
+    // Nanti ganti dengan matriks kamera asli dari game
+    Matrix4x4 dummyMatrix = {};
+    
+    // Memanggil fungsi ESP dari esp_player.h (jika sudah di-include)
+    // DrawPlayerESP(drawList, dummyMatrix, io.DisplaySize.x, io.DisplaySize.y, false, ImVec2(0,0));
+}
+
 inline float GetDynamicOffset(float screenHeight, float fovScale) {
     float baseOffset = screenHeight / 6.5f;
     return baseOffset / fovScale;

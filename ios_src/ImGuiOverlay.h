@@ -6,5 +6,4 @@
 @interface ImGuiOverlay : UIView
 + (instancetype)sharedOverlay;
 - (void)setupImGui;
-- (void)renderESP;
 @end
