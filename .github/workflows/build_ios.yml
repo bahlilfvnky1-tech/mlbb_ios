@@ -11,7 +11,7 @@ jobs:
 
     steps:
     - name: 📥 Checkout Code
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 🔨 Compile iOS Dylib
       run: |
@@ -50,7 +50,7 @@ jobs:
         fi
 
     - name: 🚀 Upload Mod IPA
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: MLBB_iOS_Mod_ReadyToInstall
         path: Mod_MLBB.ipa
