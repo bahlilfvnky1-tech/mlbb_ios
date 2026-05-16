@@ -15,12 +15,23 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         Vec2 rootPosW2S;
         if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenH)) continue;
         
+        // --- 3D PERSPECTIVE HEIGHT ---
+        Vec3 headPos3D = e.pos;
+        headPos3D.y += 1.0f; // Tinggi rata-rata monster lebih pendek
+        Vec2 headPosW2S;
+        ImVec2 headPosVec2;
+        if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenH)) {
+            headPosVec2 = ImVec2(headPosW2S.x, headPosW2S.y);
+        } else {
+            headPosVec2 = ImVec2(rootPosW2S.x, rootPosW2S.y - 40.0f);
+        }
+        
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
         // ================== MONSTER ROUND / ICON ==================
         float circleRadius = 10.0f / CurrentFOVScale;
-        draw->AddCircleFilled(ImVec2(rootPosVec2.x, rootPosVec2.y + 10 / CurrentFOVScale), circleRadius, IM_COL32(160, 32, 240, 200));
-        draw->AddCircle(ImVec2(rootPosVec2.x, rootPosVec2.y + 10 / CurrentFOVScale), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
+        draw->AddCircleFilled(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(160, 32, 240, 200));
+        draw->AddCircle(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
         
         // ================== MONSTER NAME ==================
         if (e.name.length() > 0) {
@@ -28,7 +39,7 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
             auto textSize = ImGui::CalcTextSize(e.name.c_str());
             float scaledTextWidth = (textSize.x * fontSize) / ImGui::GetFontSize();
             
-            ImVec2 textPos = {rootPosVec2.x - (scaledTextWidth / 2), rootPosVec2.y + 25 / CurrentFOVScale};
+            ImVec2 textPos = {rootPosVec2.x - (scaledTextWidth / 2), headPosVec2.y - 15.0f};
             draw->AddText(NULL, fontSize, ImVec2(textPos.x + 1.0f, textPos.y + 1.0f), IM_COL32(0, 0, 0, 240), e.name.c_str());
             draw->AddText(NULL, fontSize, textPos, IM_COL32(255, 255, 255, 255), e.name.c_str());
         }
@@ -69,8 +80,19 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
         
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
-        float dynamicOffset = GetDynamicOffset(screenH, CurrentFOVScale);
-        ImVec2 HeadPosVec2 = ImVec2(rootPosVec2.x, rootPosVec2.y - dynamicOffset);
+        // --- 3D PERSPECTIVE HEIGHT (Lebih Akurat) ---
+        Vec3 headPos3D = e.pos;
+        headPos3D.y += 1.8f; // Tinggi rata-rata hero di Unity
+        Vec2 headPosW2S;
+        ImVec2 HeadPosVec2;
+        if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenH)) {
+            HeadPosVec2 = ImVec2(headPosW2S.x, headPosW2S.y);
+        } else {
+            // Fallback
+            float dynamicOffset = GetDynamicOffset(screenH, CurrentFOVScale);
+            HeadPosVec2 = ImVec2(rootPosVec2.x, rootPosVec2.y - dynamicOffset);
+        }
+        
         float baseY = rootPosVec2.y + (55.0f / CurrentFOVScale);
 
         // ================== LINE ==================

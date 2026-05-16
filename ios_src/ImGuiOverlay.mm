@@ -224,14 +224,30 @@
         if (g_Battle.isValid) {
             SyncFeatureToESP();
             
-            // --- AUTO DETECT SAFE AREA (NOTCH) ---
-            UIEdgeInsets safeArea = self.safeAreaInsets;
-            // Tambahkan otomatis safeArea.left ke X Offset, dan safeArea.top ke Y Offset
-            // Ini akan otomatis menggeser ESP jika iPhone memiliki Poni/Dynamic Island di kiri/atas
-            g_ESPCfg.ScreenOffsetX += safeArea.left;
-            g_ESPCfg.ScreenOffsetY += safeArea.top;
+            // --- AUTO DETECT SAFE AREA (NOTCH) FIX ---
+            // 1. Ambil dari window utama agar nilainya tidak 0
+            UIWindow *mainWindow = self.window;
+            if (!mainWindow) {
+                mainWindow = [UIApplication sharedApplication].keyWindow;
+            }
+            UIEdgeInsets safeArea = UIEdgeInsetsZero;
+            if (mainWindow) {
+                safeArea = mainWindow.safeAreaInsets;
+            }
+            
+            // 2. BACKUP nilai slider manual yang di-set oleh user
+            float manualOffsetX = g_ESPCfg.ScreenOffsetX;
+            float manualOffsetY = g_ESPCfg.ScreenOffsetY;
+            
+            // 3. Tambahkan offset poni dari sistem iOS
+            g_ESPCfg.ScreenOffsetX = manualOffsetX + safeArea.left;
+            g_ESPCfg.ScreenOffsetY = manualOffsetY + safeArea.top;
             
             RenderESPCore();
+            
+            // 4. RESTORE (Kembalikan) ke nilai manual agar UI Slider tidak error
+            g_ESPCfg.ScreenOffsetX = manualOffsetX;
+            g_ESPCfg.ScreenOffsetY = manualOffsetY;
         }
         
         // Sinkronisasi status tombol toggle native setiap frame
