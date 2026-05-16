@@ -41,17 +41,33 @@ void* MemoryThread(void* arg) {
     return NULL;
 }
 
+void SetupUI() {
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        UIWindow *window = [UIApplication sharedApplication].keyWindow;
+        if (!window) {
+            for (UIWindow *w in [UIApplication sharedApplication].windows) {
+                if (w.isKeyWindow) { window = w; break; }
+            }
+        }
+        
+        if (window) {
+            NSLog(@"[Cheat] UIWindow found. Initializing UI Overlay...");
+            [ImGuiOverlay sharedOverlay];
+        } else {
+            NSLog(@"[Cheat] UIWindow not ready yet. Retrying...");
+            SetupUI();
+        }
+    });
+}
+
 // Atribut constructor menjamin fungsi ini dipanggil otomatis 
 // sesaat setelah libmlbb_cheat.dylib berhasil di-load oleh iOS
 __attribute__((constructor))
 void InitCheat() {
     NSLog(@"[Cheat] Dylib Injected Successfully!");
     
-    // Setup UI di Main Thread (Harus di main thread karena UIKit)
-    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        NSLog(@"[Cheat] Initializing UI Overlay...");
-        [ImGuiOverlay sharedOverlay];
-    });
+    // Setup UI di Main Thread dengan retry mechanism
+    SetupUI();
 
     // Jalankan Memory Scanner di background thread
     pthread_t ptid;

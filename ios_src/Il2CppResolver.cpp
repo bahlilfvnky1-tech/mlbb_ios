@@ -51,10 +51,16 @@ bool Il2CppAttach() {
 void *Il2CppGetImageByName(const char *image) {
     if (!il2cpp_domain_get || !il2cpp_domain_get_assemblies || !il2cpp_assembly_get_image || !il2cpp_image_get_name) return nullptr;
     
+    void* domain = il2cpp_domain_get();
+    if (!domain) return nullptr; // Unity belum selesai inisialisasi
+    
     size_t size = 0;
-    void **assemblies = il2cpp_domain_get_assemblies(il2cpp_domain_get(), &size);
+    void **assemblies = il2cpp_domain_get_assemblies(domain, &size);
+    if (!assemblies) return nullptr;
+    
     for(size_t i = 0; i < size; ++i) {
         void *img = (void *)il2cpp_assembly_get_image(assemblies[i]);
+        if (!img) continue;
         const char *img_name = il2cpp_image_get_name(img);
         if (img_name && strcmp(img_name, image) == 0) {
             return img;
