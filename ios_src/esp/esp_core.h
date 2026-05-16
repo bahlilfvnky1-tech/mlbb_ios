@@ -48,9 +48,12 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
         // Z < 0 berarti objek ada di belakang kamera
         if (result.z < 0.01f) return false; 
         
-        screen.x = result.x;
+        // Terapkan Scaling
+        float scale = g_ESPCfg.ScreenScale > 0.1f ? g_ESPCfg.ScreenScale : 1.0f;
+        screen.x = (result.x / scale) + g_ESPCfg.ScreenOffsetX;
+        
         // ImGui menggunakan Top-Left (0,0), sedangkan Unity menggunakan Bottom-Left (0,0)
-        screen.y = screenH - result.y; 
+        screen.y = (screenH - (result.y / scale)) + g_ESPCfg.ScreenOffsetY; 
         return true;
     }
     return false;

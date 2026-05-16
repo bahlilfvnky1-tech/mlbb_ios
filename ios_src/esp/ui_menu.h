@@ -22,6 +22,9 @@ inline void SyncFeatureToESP() {
     g_ESPCfg.ESPMName     = Feature.ESPMName;
     g_ESPCfg.ESPSkillCD   = Feature.ESPSkillCD;
     g_ESPCfg.ESPSpellCD   = Feature.ESPSpellCD;
+    g_ESPCfg.ScreenOffsetX = Feature.ESPOffsetX;
+    g_ESPCfg.ScreenOffsetY = Feature.ESPOffsetY;
+    g_ESPCfg.ScreenScale   = Feature.ESPScale;
 }
 
 inline void RenderRetriDot() {
@@ -218,6 +221,16 @@ inline void ShowMenu()
             
             ModernCheckbox("Auto Load Settings", &AutoLoadSettings);
             ImGui::SameLine(); MetricsHelpMarker("If enabled, settings will automatically load when ESP starts.");
+            
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            
+            ImGui::TextColored(ACCENT_RED, "ESP Screen Alignment");
+            ModernSlider("X Offset (Notch)", &Feature.ESPOffsetX, -200.0f, 200.0f, "%.1f");
+            ModernSlider("Y Offset (Height)", &Feature.ESPOffsetY, -200.0f, 200.0f, "%.1f");
+            ModernSlider("Screen Scale", &Feature.ESPScale, 0.5f, 3.0f, "%.2f");
+            ImGui::TextWrapped("Gunakan offset & scale ini untuk menggeser/menyesuaikan ESP jika kurang pas di body hero.");
             
             ImGui::Spacing();
             ImGui::Separator();

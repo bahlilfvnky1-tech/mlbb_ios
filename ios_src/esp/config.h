@@ -31,6 +31,9 @@ struct FeatureState {
     bool ESPMName = false;
     bool ESPSkillCD = true;
     bool ESPSpellCD = true;
+    float ESPOffsetX = 0.0f;
+    float ESPOffsetY = -30.0f;
+    float ESPScale = 1.0f;
 };
 extern FeatureState Feature;
 
@@ -65,6 +68,11 @@ struct EspConfig {
     float MinimapPosY = 0.0f;
     int MinimapSize = 274;
     int MinimapIconSize = 32;
+    
+    // Screen Offsets untuk ESP (Kompensasi Safe Area / Notch iOS)
+    float ScreenOffsetX = 0.0f;
+    float ScreenOffsetY = -30.0f; // -30.0f karena secara default m_vCachePosition adalah posisi kaki
+    float ScreenScale = 1.0f; // Skala (jika layar iPhone menggunakan Retina scale yang beda)
 };
 extern EspConfig g_ESPCfg;
 
