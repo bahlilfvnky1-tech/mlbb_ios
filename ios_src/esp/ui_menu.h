@@ -77,36 +77,8 @@ inline void ShowMenu()
     ApplyDarkAMOLEDTheme();
 
     if (!bShowMenu) {
-        ImVec2 buttonPos = ImVec2(20, io.DisplaySize.y - 140);
-        ImGui::SetNextWindowPos(buttonPos);
-        ImGui::SetNextWindowSize(ImVec2(140, 140));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0, 0));
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 8.0f);
-        ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4(0, 0, 0, 0));
-        if (ImGui::Begin("ShowMenuButton", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus)) {
-            if (!g_MenuLogoLoaded) {
-                g_MenuLogoTex = LoadTextureFromFile("/data/local/tmp/hero_icons/logo.png");
-                g_MenuLogoLoaded = true;
-            }
-            
-            if (g_MenuLogoTex != 0) {
-                ImGui::PushStyleColor(ImGuiCol_Button, ImVec4(0, 0, 0, 0));
-                ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.2f));
-                ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4(1.0f, 1.0f, 1.0f, 0.4f));
-                if (ImGui::ImageButton("##MenuLogo", (void*)(intptr_t)g_MenuLogoTex, ImVec2(100, 100))) {
-                    bShowMenu = true;
-                }
-                ImGui::PopStyleColor(3);
-            } else {
-                MelzmodButton("CBZ", ImVec2(70, 50));
-                if (ImGui::IsItemClicked()) {
-                    bShowMenu = true;
-                }
-            }
-        }
-        ImGui::End();
-        ImGui::PopStyleColor();
-        ImGui::PopStyleVar(2);
+        // Tombol toggle sekarang ditangani oleh native UIButton di ImGuiOverlay.mm
+        // Jadi kita tidak perlu render apapun via ImGui jika menu tertutup
         return;
     }
 

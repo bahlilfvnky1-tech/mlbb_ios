@@ -11,6 +11,7 @@
 @property (nonatomic, strong) MTKView *mtkView;
 @property (nonatomic, strong) id <MTLDevice> device;
 @property (nonatomic, strong) id <MTLCommandQueue> commandQueue;
+@property (nonatomic, strong) UIButton *toggleButton;
 @end
 
 @implementation ImGuiOverlay
@@ -31,8 +32,11 @@
     if (self) {
         self.backgroundColor = [UIColor clearColor];
         self.userInteractionEnabled = YES; // Agar bisa terima touch
+        self.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
+        
         [self setupMetal];
         [self setupImGui];
+        [self setupToggleButton];
     }
     return self;
 }
@@ -45,10 +49,38 @@
     self.mtkView.backgroundColor = [UIColor clearColor];
     self.mtkView.delegate = self;
     self.mtkView.framebufferOnly = NO;
+    self.mtkView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
     
     // Agar background transparan (overlay)
     self.mtkView.clearColor = MTLClearColorMake(0, 0, 0, 0);
     [self addSubview:self.mtkView];
+}
+
+- (void)setupToggleButton {
+    // Buat tombol native iOS agar 100% bisa diklik tanpa masalah hitTest
+    self.toggleButton = [UIButton buttonWithType:UIButtonTypeCustom];
+    self.toggleButton.frame = CGRectMake(20, self.bounds.size.height - 120, 80, 80);
+    self.toggleButton.backgroundColor = [UIColor colorWithRed:0 green:0 blue:0 alpha:0.6];
+    self.toggleButton.layer.cornerRadius = 40;
+    self.toggleButton.layer.borderWidth = 2;
+    self.toggleButton.layer.borderColor = [UIColor whiteColor].CGColor;
+    [self.toggleButton setTitle:@"CBZ" forState:UIControlStateNormal];
+    [self.toggleButton setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+    self.toggleButton.titleLabel.font = [UIFont boldSystemFontOfSize:20];
+    
+    [self.toggleButton addTarget:self action:@selector(onToggleClicked) forControlEvents:UIControlEventTouchUpInside];
+    [self addSubview:self.toggleButton];
+}
+
+- (void)onToggleClicked {
+    bShowMenu = !bShowMenu;
+    self.toggleButton.hidden = bShowMenu; // Sembunyikan tombol native jika menu ImGui terbuka
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    self.mtkView.frame = self.bounds;
+    self.toggleButton.frame = CGRectMake(20, self.bounds.size.height - 120, 80, 80);
 }
 
 - (void)setupImGui {
@@ -96,20 +128,19 @@
 
 // Meneruskan touch ke game jika menu ImGui tidak disentuh
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
-    ImGuiIO& io = ImGui::GetIO();
-    
     if (bShowMenu) {
+        // Jika menu terbuka, cek apakah touch mengenai window ImGui
+        // ImGuiIO& io = ImGui::GetIO();
+        // io.WantCaptureMouse akan true jika kita menyentuh window ImGui
         return [super hitTest:point withEvent:event];
     }
     
-    // Jika menu tertutup, cek apakah touch mengenai tombol toggle (CBZ)
-    // Posisi tombol toggle di ui_menu.h: x=20, y=DisplaySize.y - 140, w=140, h=140
-    CGRect toggleButtonRect = CGRectMake(20, self.bounds.size.height - 140, 140, 140);
-    if (CGRectContainsPoint(toggleButtonRect, point)) {
-        return [super hitTest:point withEvent:event];
+    // Jika menu tertutup, hanya tombol native yang bisa disentuh
+    if (!self.toggleButton.hidden && CGRectContainsPoint(self.toggleButton.frame, point)) {
+        return self.toggleButton;
     }
     
-    return nil;
+    return nil; // Sentuhan diteruskan ke game
 }
 
 #pragma mark - MTKViewDelegate
