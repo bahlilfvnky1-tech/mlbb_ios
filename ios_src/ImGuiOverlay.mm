@@ -89,6 +89,12 @@
     ImGuiIO& io = ImGui::GetIO(); (void)io;
     
     ImGui::StyleColorsDark();
+    
+    // Scale ImGui for iOS Retina Displays agar tidak terlalu kecil
+    CGFloat scale = [UIScreen mainScreen].scale;
+    ImGui::GetStyle().ScaleAllSizes(scale);
+    io.FontGlobalScale = scale * 0.8f; // Besarkan font secara proporsional
+    
     ImGui_ImplMetal_Init(self.device);
     
     // Konfigurasi IO Display
@@ -152,6 +158,9 @@
     ImGuiIO& io = ImGui::GetIO();
     io.DisplaySize.x = view.bounds.size.width;
     io.DisplaySize.y = view.bounds.size.height;
+    
+    // SANGAT PENTING: Set FramebufferScale agar sentuhan akurat dan menu tidak terpotong (clipping) di layar Retina
+    io.DisplayFramebufferScale = ImVec2(view.contentScaleFactor, view.contentScaleFactor);
     
     id<MTLCommandBuffer> commandBuffer = [self.commandQueue commandBuffer];
     MTLRenderPassDescriptor *renderPassDescriptor = view.currentRenderPassDescriptor;
