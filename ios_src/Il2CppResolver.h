@@ -10,6 +10,7 @@ extern "C" {
     extern void *(*il2cpp_class_from_name)(const void *image, const char *namespaze, const char *name);
     extern void *(*il2cpp_class_get_field_from_name)(void *klass, const char *name);
     extern void *(*il2cpp_class_get_method_from_name)(void *klass, const char *name, int argsCount);
+    extern void *(*il2cpp_class_get_parent)(void *klass);
     extern size_t (*il2cpp_field_get_offset)(void *field);
     extern void (*il2cpp_field_static_get_value)(void *field, void *value);
     extern void (*il2cpp_field_static_set_value)(void *field, void *value);

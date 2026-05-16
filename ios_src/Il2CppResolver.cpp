@@ -12,6 +12,7 @@ extern "C" {
     void *(*il2cpp_class_from_name)(const void *image, const char *namespaze, const char *name) = nullptr;
     void *(*il2cpp_class_get_field_from_name)(void *klass, const char *name) = nullptr;
     void *(*il2cpp_class_get_method_from_name)(void *klass, const char *name, int argsCount) = nullptr;
+    void *(*il2cpp_class_get_parent)(void *klass) = nullptr;
     size_t (*il2cpp_field_get_offset)(void *field) = nullptr;
     void (*il2cpp_field_static_get_value)(void *field, void *value) = nullptr;
     void (*il2cpp_field_static_set_value)(void *field, void *value) = nullptr;
@@ -41,6 +42,7 @@ bool Il2CppAttach() {
     il2cpp_class_from_name = (void *(*)(const void *, const char *, const char *)) dlsym(handle, "il2cpp_class_from_name");
     il2cpp_class_get_field_from_name = (void *(*)(void *, const char *)) dlsym(handle, "il2cpp_class_get_field_from_name");
     il2cpp_class_get_method_from_name = (void *(*)(void *, const char *, int)) dlsym(handle, "il2cpp_class_get_method_from_name");
+    il2cpp_class_get_parent = (void *(*)(void *)) dlsym(handle, "il2cpp_class_get_parent");
     il2cpp_field_get_offset = (size_t (*)(void *)) dlsym(handle, "il2cpp_field_get_offset");
     il2cpp_field_static_get_value = (void (*)(void *, void *)) dlsym(handle, "il2cpp_field_static_get_value");
     il2cpp_field_static_set_value = (void (*)(void *, void *)) dlsym(handle, "il2cpp_field_static_set_value");
@@ -99,15 +101,25 @@ void Il2CppGetStaticFieldValue(const char *image, const char *namespaze, const c
 
 size_t Il2CppGetFieldOffset(const char *image, const char *namespaze, const char *clazz, const char *name) {
     void *klass = Il2CppGetClassType(image, namespaze, clazz);
-    if (!klass) return -1;
+    if (!klass) return 0;
     
-    void *field = il2cpp_class_get_field_from_name(klass, name);
-    if (!field) return -1;
+    void *field = nullptr;
+    while (klass != nullptr) {
+        field = il2cpp_class_get_field_from_name(klass, name);
+        if (field) break;
+        if (il2cpp_class_get_parent) {
+            klass = il2cpp_class_get_parent(klass);
+        } else {
+            break;
+        }
+    }
+    
+    if (!field) return 0;
     
     if (il2cpp_field_get_offset) {
         return il2cpp_field_get_offset(field);
     }
-    return -1;
+    return 0;
 }
 
 void *Il2CppGetMethodOffset(const char *image, const char *namespaze, const char *clazz, const char *name, int argsCount) {

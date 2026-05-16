@@ -47,29 +47,83 @@
 #define OFF_SHOW_IS_PLAYER      0x93   // IsPlayer
 #define OFF_SHOW_IS_BOSS        0x96   // IsBoss
 #define OFF_SHOW_IS_SUMMONS     0x99   // IsSummons
-#define OFF_SHOW_IS_DEATH       0xCD   // m_bDeath (Boolean) *** IS DEAD ***
-#define OFF_SHOW_CAMP           0xD8   // m_EntityCampType (Int32) 1=Blue 2=Red
+
+inline size_t Get_SE_DEATH_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_bDeath"); if (off == 0) off = 0xCD; }
+    return off;
+}
+
+#define OFF_SHOW_IS_DEATH       Get_SE_DEATH_Offset()
+
+inline size_t Get_SE_CAMP_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_EntityCampType"); if (off == 0) off = 0xD8; }
+    return off;
+}
+
+#define OFF_SHOW_CAMP           Get_SE_CAMP_Offset()
 #define OFF_SHOW_EQUIP_COMP     0xE0   // m_EquipComp*
 #define OFF_SHOW_BUFF_COMP      0xE8   // m_BuffComp*
 #define OFF_SHOW_SKILL_COMP     0xF0   // m_SkillComp*
 #define OFF_SHOW_ATTR_COMP      0x108  // m_ShowAttributeComp*
 
-// ---- EntityBase HP fields (ShowEntity offset basis) ----
-// ShowEntity inherits from EntityUnityComp, then EntityBase
-// EntityBase HP fields start here relative to ShowEntity vtable:
-#define OFF_SE_GUID             0x190  // m_uGuid (0xA8 + 0xE8)
-#define OFF_SE_ID               0x194  // m_ID (0xAC + 0xE8)
-#define OFF_SE_LEVEL            0x198  // m_Level (0xB0 + 0xE8)
-#define OFF_SE_HP               0x1B0  // m_Hp (0xC8 + 0xE8)
-#define OFF_SE_HP_MAX           0x1B4  // m_HpMax (0xCC + 0xE8)
-#define OFF_SE_HP_PER           0x1B8  // m_HpPer (0xD0 + 0xE8)
-#define OFF_SE_MP               0x1D8  // m_Mp (0xF0 + 0xE8)
-#define OFF_SE_MP_MAX           0x1DC  // _MpMax (0xF4 + 0xE8)
+#include "../Il2CppResolver.h"
+
+inline size_t Get_SE_GUID_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_uGuid"); if (off == 0) off = 0xA8; }
+    return off;
+}
+
+inline size_t Get_SE_ID_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_ID"); if (off == 0) off = 0xAC; }
+    return off;
+}
+
+inline size_t Get_SE_LEVEL_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_level"); if (off == 0) off = 0xB0; }
+    return off;
+}
+
+inline size_t Get_SE_HP_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_Hp"); if (off == 0) off = 0xC8; }
+    return off;
+}
+
+inline size_t Get_SE_HPMAX_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_HpMax"); if (off == 0) off = 0xCC; }
+    return off;
+}
+
+inline size_t Get_SE_POS_Offset() {
+    static size_t off = 0;
+    if (off == 0) { 
+        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition"); 
+        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position");
+        if (off == 0) off = 0x294; 
+    }
+    return off;
+}
+
+// ---- EntityBase HP fields (ShowEntity offset basis dynamically resolved) ----
+#define OFF_SE_GUID             Get_SE_GUID_Offset()
+#define OFF_SE_ID               Get_SE_ID_Offset()
+#define OFF_SE_LEVEL            Get_SE_LEVEL_Offset()
+#define OFF_SE_HP               Get_SE_HP_Offset()
+#define OFF_SE_HP_MAX           Get_SE_HPMAX_Offset()
+#define OFF_SE_HP_PER           (Get_SE_HPMAX_Offset() + 4)
+#define OFF_SE_MP               (Get_SE_HPMAX_Offset() + 36)
+#define OFF_SE_MP_MAX           (Get_SE_HPMAX_Offset() + 40)
 
 // ---- Position (m_vCachePosition = Vector3) ----
-#define OFF_POS_X               0x294  // m_vCachePosition.x (Single)
-#define OFF_POS_Y               0x298  // m_vCachePosition.y (Single)
-#define OFF_POS_Z               0x29C  // m_vCachePosition.z (Single)
+#define OFF_POS_X               Get_SE_POS_Offset()
+#define OFF_POS_Y               (Get_SE_POS_Offset() + 4)
+#define OFF_POS_Z               (Get_SE_POS_Offset() + 8)
 
 // ---- ShowPlayer (extends ShowEntity) ----
 #define OFF_PLAYER_ORIGIN_HERO_ID 0x8F8  // m_iOriginHeroId (Int32)
