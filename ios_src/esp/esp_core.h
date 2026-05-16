@@ -4,12 +4,15 @@
 
 typedef unsigned int GLuint;
 
-extern GLuint GetHeroIcon(int heroId);
+inline GLuint GetHeroIcon(int heroId) {
+    // Implementasi dummy: kembalikan 0 jika tidak ada gambar ikon yang dimuat
+    return 0;
+}
 
 // ============================================================
 // Unity Native Camera API
 // ============================================================
-extern "C" void* Il2CppGetMethodOffset(const char *image, const char *namespaze, const char *clazz, const char *name, int argsCount);
+#include "../Il2CppResolver.h"
 
 inline void* GetCameraMain() {
     static void* get_main_method = nullptr;
