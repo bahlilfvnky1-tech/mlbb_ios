@@ -6,7 +6,7 @@
 #include "esp_minimap.h"
 #include <string>
 
-inline void DrawPlayerESP(ImDrawList* draw, const Matrix4x4& vpMatrix, float screenW, float screenH, bool hasSelf, const ImVec2& selfPosVec2) {
+inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float screenH, bool hasSelf, const ImVec2& selfPosVec2) {
     float CurrentFOVScale = 1.0f; 
 
     for (auto& e : g_Battle.heroes_render) {
@@ -16,7 +16,8 @@ inline void DrawPlayerESP(ImDrawList* draw, const Matrix4x4& vpMatrix, float scr
         DrawMinimapIcon(draw, e.entityId, e.hp, e.hpMax, e.pos, g_Battle.localCamp);
 
         Vec2 rootPosW2S;
-        if(!WorldToScreen(e.pos, rootPosW2S, vpMatrix, screenW, screenH)) continue;
+        // Gunakan UnityWorldToScreen yang memanggil Camera.WorldToScreenPoint via Il2Cpp
+        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenH)) continue;
         
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         

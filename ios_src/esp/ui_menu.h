@@ -63,10 +63,10 @@ extern GLuint LoadTextureFromFile(const char* filename);
 static GLuint g_MenuLogoTex = 0;
 static bool g_MenuLogoLoaded = false;
 
-static ImVec2 menuPos = ImVec2(40, 40);
-static ImVec2 menuSize = ImVec2(780, 560);
-static ImVec2 minSize = ImVec2(600, 400);
-static ImVec2 maxSize = ImVec2(1200, 800);
+static ImVec2 menuPos = ImVec2(20, 20);
+static ImVec2 menuSize = ImVec2(480, 320);
+static ImVec2 minSize = ImVec2(400, 250);
+static ImVec2 maxSize = ImVec2(800, 600);
 
 inline void ShowMenu()
 {
