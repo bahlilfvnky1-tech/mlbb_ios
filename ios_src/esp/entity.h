@@ -211,6 +211,31 @@ struct BattleState {
         monsters_render = monsters;
     }
 
+    // Offset Cache
+    size_t Get_dicPlayerShow_Offset() {
+        static size_t off = 0;
+        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "BattleManager", "m_dicPlayerShow");
+        return off;
+    }
+    
+    size_t Get_dicMonsterShow_Offset() {
+        static size_t off = 0;
+        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "BattleManager", "m_dicMonsterShow");
+        return off;
+    }
+    
+    size_t Get_LocalPlayerShow_Offset() {
+        static size_t off = 0;
+        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "BattleManager", "m_LocalPlayerShow");
+        return off;
+    }
+    
+    size_t Get_ShowMonsters_Offset() {
+        static size_t off = 0;
+        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "BattleManager", "m_ShowMonsters");
+        return off;
+    }
+
     // Refresh dari memori
     void Update(uintptr_t bmPtr, uintptr_t logicBmPtr) {
         using namespace InternalMemory;
@@ -219,23 +244,29 @@ struct BattleState {
         std::vector<EntityData> tempHeroes;
         std::vector<EntityData> tempMonsters;
         
-        uint64_t t_curFrame = Read<uint64_t>(bmPtr + OFF_BM_CUR_FRAME);
-        uintptr_t t_localPlayerPtr = ReadPtr(bmPtr + OFF_BM_LOCAL_PLAYER);
+        uintptr_t t_localPlayerPtr = ReadPtr(bmPtr + Get_LocalPlayerShow_Offset());
         int32_t t_localCamp = 0;
         
         if (t_localPlayerPtr) {
             t_localCamp = ReadInt32(t_localPlayerPtr + OFF_SHOW_CAMP);
         }
 
-        // ---- Read ShowPlayers ----
-        uintptr_t playersListPtr = ReadPtr(bmPtr + OFF_BM_SHOW_PLAYERS);
-        if (playersListPtr) {
-            int32_t size = ReadInt32(playersListPtr + OFF_LIST_SIZE);
-            uintptr_t itemsArr = ReadPtr(playersListPtr + OFF_LIST_ITEMS);
-            if (size > 0 && size <= 50 && itemsArr) {
-                for (int i = 0; i < size; i++) {
-                    uintptr_t entityPtr = ReadPtr(itemsArr + OFF_ARRAY_FIRST_ITEM + i * 8);
-                    if (!entityPtr) continue;
+        // ---- Read ShowPlayers via m_dicPlayerShow (Persis seperti Code Breaker) ----
+        uintptr_t dicPlayersPtr = ReadPtr(bmPtr + Get_dicPlayerShow_Offset());
+        if (dicPlayersPtr && dicPlayersPtr > 0x100000000ULL) {
+            uintptr_t entries = ReadPtr(dicPlayersPtr + 0x18);
+            int32_t dicCount = ReadInt32(dicPlayersPtr + 0x20); // Count
+            if (dicCount <= 0 || dicCount > 50) {
+                dicCount = ReadInt32(dicPlayersPtr + 0x40); // Alternatif di versi Unity berbeda
+            }
+            if (entries && dicCount > 0 && dicCount <= 50) {
+                for (int i = 0; i < dicCount; i++) {
+                    // Entry = 24 bytes (int hashCode, int next, int key, padding, uintptr_t value)
+                    // Offset array header = 0x20
+                    // Offset value di dalam Entry = 16
+                    uintptr_t entityPtr = ReadPtr(entries + 0x20 + (i * 24) + 16);
+                    if (!entityPtr || entityPtr < 0x100000000ULL) continue;
+                    
                     EntityData e;
                     e.ptr = entityPtr;
                     EntityReader::ReadBase(e);
@@ -249,7 +280,7 @@ struct BattleState {
         }
 
         // ---- Read ShowMonsters (List) ----
-        uintptr_t monstersListPtr = ReadPtr(bmPtr + OFF_BM_SHOW_MONSTERS);
+        uintptr_t monstersListPtr = ReadPtr(bmPtr + Get_ShowMonsters_Offset());
         if (monstersListPtr) {
             int32_t size = ReadInt32(monstersListPtr + OFF_LIST_SIZE);
             uintptr_t itemsArr = ReadPtr(monstersListPtr + OFF_LIST_ITEMS);
@@ -273,12 +304,12 @@ struct BattleState {
         }
 
         // ---- Read ShowMonsters (Dictionary - Supplement) ----
-        uintptr_t dicPtr = ReadPtr(bmPtr + 0x70); // m_dicMonsterShow
-        if (dicPtr && dicPtr > 0x7000000000ULL) {
-            uintptr_t entries = ReadPtr(dicPtr + 0x18);
-            int32_t dicCount = ReadInt32(dicPtr + 0x20);
+        uintptr_t dicMonstersPtr = ReadPtr(bmPtr + Get_dicMonsterShow_Offset());
+        if (dicMonstersPtr && dicMonstersPtr > 0x100000000ULL) {
+            uintptr_t entries = ReadPtr(dicMonstersPtr + 0x18);
+            int32_t dicCount = ReadInt32(dicMonstersPtr + 0x20);
             if (dicCount <= 0 || dicCount > 500) {
-                dicCount = ReadInt32(dicPtr + 0x40);
+                dicCount = ReadInt32(dicMonstersPtr + 0x40);
             }
             if (entries && dicCount > 0 && dicCount <= 500) {
                 for (int i = 0; i < dicCount; i++) {

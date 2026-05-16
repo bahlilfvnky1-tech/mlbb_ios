@@ -30,7 +30,7 @@ void* MemoryThread(void* arg) {
         void* bmInst = nullptr;
         void* logicBmInst = nullptr;
         
-        // Dapatkan static field Instance dari BattleManager
+        // Dapatkan static field Instance dari BattleManager (Bukan GameLogic, persis Code Breaker)
         Il2CppGetStaticFieldValue("Assembly-CSharp.dll", "", "BattleManager", "Instance", &bmInst);
         
         // Dapatkan static field Instance dari LogicBattleManager
@@ -48,14 +48,13 @@ void* MemoryThread(void* arg) {
             }
         }
         
-        // Kita hapus pengecekan ketat battleState == 2 || 3 dari Code Breaker
-        // karena di iOS ini kadang menyebabkan ESP tidak jalan (method/offset gagal dipanggil atau enum berbeda).
-        // Selama GameLogic dan LogicBattleManager tidak null, kita asumsikan sedang di match!
-        if (bmInst && logicBmInst) {
+        // Kembalikan ke logika Code Breaker asli:
+        // Harus mengecek battleState == 2 || battleState == 3 (berarti sedang dalam match/room)
+        if (bmInst && logicBmInst && (battleState == 2 || battleState == 3)) {
             // Karena pointer ini adalah objek Il2Cpp langsung, kita casting ke uintptr_t
             g_Battle.Update((uintptr_t)bmInst, (uintptr_t)logicBmInst);
         } else {
-            g_Battle.isValid = false; // Disable ESP di Lobby jika pointer null
+            g_Battle.isValid = false; // Disable ESP di Lobby
         }
         
         usleep(30000); // 30ms sleep (~33 fps ESP update rate)
