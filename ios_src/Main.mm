@@ -8,41 +8,33 @@
 
 #import "ImGuiOverlay.h"
 
-// Deklarasi global base address
-uintptr_t g_il2cppBase = 0;
-
-// Fungsi untuk mencari Base Address dari UnityFramework
-void FindBaseAddress() {
-    for (uint32_t i = 0; i < _dyld_image_count(); i++) {
-        const char *name = _dyld_get_image_name(i);
-        if (strstr(name, "UnityFramework")) {
-            g_il2cppBase = _dyld_get_image_vmaddr_slide(i) + 0x100000000;
-            NSLog(@"[Cheat] Found UnityFramework Base: 0x%lx", g_il2cppBase);
-            break;
-        }
-    }
-}
+#include "Il2CppResolver.h"
 
 // Thread pembaca memori (Scanner)
 void* MemoryThread(void* arg) {
     NSLog(@"[Cheat] Memory Thread Started!");
     
-    // Tunggu sampai game termuat sempurna
-    sleep(10);
-    FindBaseAddress();
+    // Tunggu sampai Il2Cpp berhasil di-attach
+    while (!Il2CppAttach()) {
+        sleep(2);
+    }
+    NSLog(@"[Cheat] Il2Cpp Attached Successfully!");
     
     while(true) {
-        if (g_il2cppBase > 0) {
-            uintptr_t logicBmPtr = InternalMemory::Read<uintptr_t>(g_il2cppBase + InternalMemory::OFF_LOGIC_BATTLE_MANAGER);
-            uintptr_t logicBmIns = InternalMemory::Read<uintptr_t>(logicBmPtr + 0xB8);
-            
-            uintptr_t bmPtr = InternalMemory::Read<uintptr_t>(g_il2cppBase + InternalMemory::OFF_BATTLE_MANAGER);
-            uintptr_t bmIns = InternalMemory::Read<uintptr_t>(bmPtr + 0xB8);
-            
-            if (bmIns && logicBmIns) {
-                g_Battle.Update(bmIns, logicBmIns);
-            }
+        void* bmInst = nullptr;
+        void* logicBmInst = nullptr;
+        
+        // Dapatkan static field Instance dari BattleManager
+        Il2CppGetStaticFieldValue("Assembly-CSharp.dll", "", "BattleManager", "Instance", &bmInst);
+        
+        // Dapatkan static field Instance dari LogicBattleManager
+        Il2CppGetStaticFieldValue("Assembly-CSharp.dll", "", "LogicBattleManager", "Instance", &logicBmInst);
+        
+        if (bmInst && logicBmInst) {
+            // Karena pointer ini adalah objek Il2Cpp langsung, kita casting ke uintptr_t
+            g_Battle.Update((uintptr_t)bmInst, (uintptr_t)logicBmInst);
         }
+        
         usleep(30000); // 30ms sleep (~33 fps ESP update rate)
     }
     

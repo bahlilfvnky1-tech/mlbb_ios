@@ -13,6 +13,7 @@ TARGET = libmlbb_cheat.dylib
 SRC = Main.mm \
       ImGuiOverlay.mm \
       esp/config.cpp \
+      Il2CppResolver.cpp \
       imgui/imgui.cpp \
       imgui/imgui_draw.cpp \
       imgui/imgui_tables.cpp \
