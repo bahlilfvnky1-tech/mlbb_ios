@@ -57,14 +57,14 @@
 // ---- EntityBase HP fields (ShowEntity offset basis) ----
 // ShowEntity inherits from EntityUnityComp, then EntityBase
 // EntityBase HP fields start here relative to ShowEntity vtable:
-#define OFF_SE_GUID             0x190  // m_uGuid (UInt32)
-#define OFF_SE_ID               0x194  // m_ID (Int32)
-#define OFF_SE_LEVEL            0x198  // m_Level (Int32)
-#define OFF_SE_HP               0x1AC  // m_Hp (Int32)
-#define OFF_SE_HP_MAX           0x1B0  // m_HpMax (Int32)
-#define OFF_SE_HP_PER           0xD0   // m_HpPer (Int32) (Wait, daemon doesn't use this, but it's safe to leave as is if unused)
-#define OFF_SE_MP               0xF0   // m_Mp (Int32)
-#define OFF_SE_MP_MAX           0xF4   // _MpMax (Int32)
+#define OFF_SE_GUID             0x190  // m_uGuid (0xA8 + 0xE8)
+#define OFF_SE_ID               0x194  // m_ID (0xAC + 0xE8)
+#define OFF_SE_LEVEL            0x198  // m_Level (0xB0 + 0xE8)
+#define OFF_SE_HP               0x1B0  // m_Hp (0xC8 + 0xE8)
+#define OFF_SE_HP_MAX           0x1B4  // m_HpMax (0xCC + 0xE8)
+#define OFF_SE_HP_PER           0x1B8  // m_HpPer (0xD0 + 0xE8)
+#define OFF_SE_MP               0x1D8  // m_Mp (0xF0 + 0xE8)
+#define OFF_SE_MP_MAX           0x1DC  // _MpMax (0xF4 + 0xE8)
 
 // ---- Position (m_vCachePosition = Vector3) ----
 #define OFF_POS_X               0x294  // m_vCachePosition.x (Single)

@@ -6,6 +6,54 @@
 #include "esp_minimap.h"
 #include <string>
 
+inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float screenH) {
+    float CurrentFOVScale = 1.0f; 
+
+    for (auto& e : g_Battle.monsters_render) {
+        if (e.isDead || e.hp <= 0) continue;
+
+        Vec2 rootPosW2S;
+        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenH)) continue;
+        
+        ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
+        
+        // ================== MONSTER ROUND / ICON ==================
+        float circleRadius = 10.0f / CurrentFOVScale;
+        draw->AddCircleFilled(ImVec2(rootPosVec2.x, rootPosVec2.y + 10 / CurrentFOVScale), circleRadius, IM_COL32(160, 32, 240, 200));
+        draw->AddCircle(ImVec2(rootPosVec2.x, rootPosVec2.y + 10 / CurrentFOVScale), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
+        
+        // ================== MONSTER NAME ==================
+        if (e.name.length() > 0) {
+            float fontSize = 16.0f / CurrentFOVScale;
+            auto textSize = ImGui::CalcTextSize(e.name.c_str());
+            float scaledTextWidth = (textSize.x * fontSize) / ImGui::GetFontSize();
+            
+            ImVec2 textPos = {rootPosVec2.x - (scaledTextWidth / 2), rootPosVec2.y + 25 / CurrentFOVScale};
+            draw->AddText(NULL, fontSize, ImVec2(textPos.x + 1.0f, textPos.y + 1.0f), IM_COL32(0, 0, 0, 240), e.name.c_str());
+            draw->AddText(NULL, fontSize, textPos, IM_COL32(255, 255, 255, 255), e.name.c_str());
+        }
+
+        // ================== MONSTER HEALTH ==================
+        float healthPercent = (float)e.hp / (float)e.hpMax;
+        ImU32 healthColor = IM_COL32(50, 255, 50, 255);
+        if (healthPercent <= 0.3f) healthColor = IM_COL32(255, 50, 50, 255);
+        else if (healthPercent <= 0.5f) healthColor = IM_COL32(255, 200, 50, 255);
+        
+        float healthBarWidth = 40.0f / CurrentFOVScale;
+        float healthBarHeight = 6.0f / CurrentFOVScale;
+        float healthBarX = rootPosVec2.x - (healthBarWidth / 2);
+        float baseY = rootPosVec2.y - 15 / CurrentFOVScale;
+        
+        ImVec2 bgStart = {healthBarX, baseY};
+        ImVec2 bgEnd = {healthBarX + healthBarWidth, baseY + healthBarHeight};
+        ImVec2 healthEnd = {healthBarX + (healthBarWidth * healthPercent), baseY + healthBarHeight};
+        
+        draw->AddRectFilled(bgStart, bgEnd, IM_COL32(0, 0, 0, 200), 2);
+        draw->AddRectFilled(bgStart, healthEnd, healthColor, 2);
+        draw->AddRect(bgStart, bgEnd, IM_COL32(255, 255, 255, 150), 2, 0, 1.0f);
+    }
+}
+
 inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float screenH, bool hasSelf, const ImVec2& selfPosVec2) {
     float CurrentFOVScale = 1.0f; 
 

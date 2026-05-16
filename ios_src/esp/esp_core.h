@@ -28,6 +28,13 @@ inline void* GetCameraMain() {
     return nullptr;
 }
 
+// Pure C struct agar Clang ARM64 compiler memperlakukannya sebagai HFA (pass/return via s0-s2 registers)
+struct UnityVector3 {
+    float x;
+    float y;
+    float z;
+};
+
 inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, float screenH) {
     if (!camera) return false;
     
@@ -39,8 +46,9 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
         }
     }
     if (w2s_method) {
+        UnityVector3 inWorld = { world.x, world.y, world.z };
         // Panggil method asli dari Unity Engine
-        Vec3 result = reinterpret_cast<Vec3(*)(void*, Vec3)>(w2s_method)(camera, world);
+        UnityVector3 result = reinterpret_cast<UnityVector3(*)(void*, UnityVector3)>(w2s_method)(camera, inWorld);
         
         // Z < 0 berarti objek ada di belakang kamera
         if (result.z < 0.01f) return false; 
@@ -55,6 +63,7 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
 
 // Forward declaration untuk menghindari circular dependency
 void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float screenH, bool hasSelf, const ImVec2& selfPosVec2);
+void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float screenH);
 
 inline void RenderESPCore() {
     // Dapatkan instance Camera.main dari Unity
@@ -65,6 +74,7 @@ inline void RenderESPCore() {
     
     // Memanggil fungsi ESP dari esp_player.h
     DrawPlayerESP(drawList, cameraMain, io.DisplaySize.x, io.DisplaySize.y, false, ImVec2(0,0));
+    DrawMonsterESP(drawList, cameraMain, io.DisplaySize.x, io.DisplaySize.y);
 }
 
 inline float GetDynamicOffset(float screenHeight, float fovScale) {
