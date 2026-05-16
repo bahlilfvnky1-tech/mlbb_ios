@@ -12,7 +12,6 @@ extern uintptr_t g_il2cppBase;
 namespace InternalMemory {
     template<typename T>
     inline T Read(uintptr_t address) {
-        // Validasi dasar agar game tidak crash jika pointer kosong
         if (address < 0x100000000) return T{}; 
         return *(T*)address;
     }
@@ -23,7 +22,6 @@ namespace InternalMemory {
         return true;
     }
 
-    // Karena ini internal cheat, menulis memori langsung bisa dilakukan dengan mudah
     template<typename T>
     inline bool Write(uintptr_t address, T value) {
         if (address < 0x100000000) return false;
