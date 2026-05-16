@@ -177,7 +177,7 @@
         
         // Sinkronisasi status tombol toggle native setiap frame
         // Panggil Menu UI
-        RenderMenu();
+        // ShowMenu() sudah dipanggil di atas
         
         // DEBUG TEXT DI LAYAR
         char debugStr[512];
