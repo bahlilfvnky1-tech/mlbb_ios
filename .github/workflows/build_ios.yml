@@ -27,6 +27,12 @@ jobs:
 
     - name: 💉 Inject Dylib into IPA
       run: |
+        # Menggabungkan file IPA yang di-split (jika ada)
+        if [ -f "mlbb.ipa.001" ]; then
+          echo "Menggabungkan file IPA..."
+          cat mlbb.ipa.* > mlbb.ipa
+        fi
+        
         # Script ini akan mencari file .ipa di folder utama repo
         IPA_FILE=$(ls *.ipa | head -n 1)
         
