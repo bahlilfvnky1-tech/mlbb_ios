@@ -241,9 +241,11 @@
                                     // Dump offset 0x20 to 0x100
                                     for (size_t off = 0x20; off < 0x140; off += 4) {
                                         int val = InternalMemory::ReadInt32(pLogicFighter + off);
-                                        // Only show values that look like VInt3 coordinates (large integers)
-                                        // Usually positions are like 10000 to 50000 for x/z
-                                        ImGui::Text("Offset 0x%02zx : %d", off, val);
+                                        // Filter: MLBB VInt3 positions on map are usually between 5000 and 80000
+                                        // e.g. 1.30 -> 13000
+                                        if (val > 1000 && val < 90000) {
+                                            ImGui::Text("Offset 0x%02zx : %d", off, val);
+                                        }
                                     }
                                 }
                             }
@@ -253,6 +255,33 @@
                 }
                 ImGui::End();
             }
+            // --- CLASS FIELD DUMPER FOR LOGICENTITY ---
+            ImGui::SetNextWindowSize(ImVec2(800, 400), ImGuiCond_FirstUseEver);
+            if (ImGui::Begin("LogicEntity Fields", nullptr, ImGuiWindowFlags_NoSavedSettings)) {
+                static std::vector<std::string> fieldNames;
+                if (fieldNames.empty()) {
+                    void *klass = Il2CppGetClassType("Assembly-CSharp.dll", "Battle", "LogicEntity");
+                    if (klass) {
+                        void* iter = nullptr;
+                        void* field = il2cpp_class_get_fields(klass, &iter);
+                        while (field != nullptr) {
+                            const char* name = il2cpp_field_get_name(field);
+                            size_t off = il2cpp_field_get_offset(field);
+                            char buf[128];
+                            snprintf(buf, sizeof(buf), "0x%zx: %s", off, name ? name : "N");
+                            fieldNames.push_back(buf);
+                            field = il2cpp_class_get_fields(klass, &iter);
+                        }
+                    }
+                }
+                ImGui::Columns(4, "FieldColumns", false);
+                for (const auto& name : fieldNames) {
+                    ImGui::Text("%s", name.c_str());
+                    ImGui::NextColumn();
+                }
+                ImGui::Columns(1);
+            }
+            ImGui::End();
             // --------------------------------------
         }
         
