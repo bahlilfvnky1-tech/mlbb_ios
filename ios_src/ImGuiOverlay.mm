@@ -234,13 +234,13 @@
                             uintptr_t p = e.ptr;
                             size_t offLogicFighter = Get_SE_LogicFighter_Offset();
                             if (offLogicFighter != 0) {
-                                uintptr_t pLogicFighter = ReadPtr(p + offLogicFighter);
+                                uintptr_t pLogicFighter = InternalMemory::ReadPtr(p + offLogicFighter);
                                 if (pLogicFighter) {
                                     ImGui::Text("Local Player LogicFighter: 0x%zx", pLogicFighter);
                                     ImGui::Separator();
                                     // Dump offset 0x20 to 0x100
                                     for (size_t off = 0x20; off < 0x140; off += 4) {
-                                        int val = ReadInt32(pLogicFighter + off);
+                                        int val = InternalMemory::ReadInt32(pLogicFighter + off);
                                         // Only show values that look like VInt3 coordinates (large integers)
                                         // Usually positions are like 10000 to 50000 for x/z
                                         ImGui::Text("Offset 0x%02zx : %d", off, val);
