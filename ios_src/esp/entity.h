@@ -261,34 +261,51 @@ struct BattleState {
             t_localCamp = ReadInt32(t_localPlayerPtr + OFF_SHOW_CAMP);
         }
 
-        // ---- Read ShowPlayers via m_dicPlayerShow (Persis seperti Code Breaker) ----
+        // ---- Read ShowPlayers (PERSIS Code Breaker: Dictionary<int,uintptr_t>) ----
+        // Dictionary layout (from Code Breaker Il2Cpp.h):
+        //   +0x10 = *buckets    +0x18 = *entries    +0x20 = count
+        //   +0x38 = *keys array +0x40 = *values array (Array<uintptr_t>)
+        // Code Breaker getValues() iterates entries->vector[i].value
+        // Kita gunakan values array langsung (lebih simpel dan akurat)
         size_t offset_dicPlayer = Get_dicPlayerShow_Offset();
         uintptr_t dicPlayersPtr = ReadPtr(bmPtr + offset_dicPlayer);
         int parsedPlayersCount = 0;
         
         if (dicPlayersPtr && dicPlayersPtr > 0x100000000ULL) {
-            uintptr_t entries = ReadPtr(dicPlayersPtr + 0x18);
-            int32_t dicCount = ReadInt32(dicPlayersPtr + 0x20); // Count
-            if (dicCount <= 0 || dicCount > 50) {
-                dicCount = ReadInt32(dicPlayersPtr + 0x40); // Alternatif di versi Unity berbeda
-            }
-            if (entries && dicCount > 0 && dicCount <= 50) {
-                parsedPlayersCount = dicCount;
+            int32_t dicCount = ReadInt32(dicPlayersPtr + 0x20); // count = getNumKeys()
+            parsedPlayersCount = dicCount;
+            
+            // Path 1: baca dari values array (Dictionary+0x40) seperti getValues()
+            uintptr_t valuesArr = ReadPtr(dicPlayersPtr + 0x40);
+            if (valuesArr && valuesArr > 0x100000000ULL && dicCount > 0 && dicCount <= 50) {
+                // Array<uintptr_t>: header 0x20, lalu vector[i] each 8 bytes
                 for (int i = 0; i < dicCount; i++) {
-                    // Entry = 24 bytes (int hashCode, int next, int key, padding, uintptr_t value)
-                    // Offset array header = 0x20
-                    // Offset value di dalam Entry = 16
-                    uintptr_t entityPtr = ReadPtr(entries + 0x20 + (i * 24) + 16);
+                    uintptr_t entityPtr = ReadPtr(valuesArr + 0x20 + i * 8);
                     if (!entityPtr || entityPtr < 0x100000000ULL) continue;
-                    
                     EntityData e;
                     e.ptr = entityPtr;
                     EntityReader::ReadBase(e);
-                    e.isPlayer = true;
-                    e.type = EntityType::Hero;
+                    e.isPlayer = true; e.type = EntityType::Hero;
                     EntityReader::ReadPlayerExtra(e);
                     e.isSelf = (entityPtr == t_localPlayerPtr);
                     tempHeroes.push_back(e);
+                }
+            } else {
+                // Path 2 (fallback): baca dari entries array
+                uintptr_t entriesArr = ReadPtr(dicPlayersPtr + 0x18);
+                if (entriesArr && dicCount > 0 && dicCount <= 50) {
+                    for (int i = 0; i < dicCount; i++) {
+                        // Entry<int,uintptr_t>=24 bytes, value at +16
+                        uintptr_t entityPtr = ReadPtr(entriesArr + 0x20 + i * 24 + 16);
+                        if (!entityPtr || entityPtr < 0x100000000ULL) continue;
+                        EntityData e;
+                        e.ptr = entityPtr;
+                        EntityReader::ReadBase(e);
+                        e.isPlayer = true; e.type = EntityType::Hero;
+                        EntityReader::ReadPlayerExtra(e);
+                        e.isSelf = (entityPtr == t_localPlayerPtr);
+                        tempHeroes.push_back(e);
+                    }
                 }
             }
         }
