@@ -103,8 +103,8 @@ inline size_t Get_SE_HPMAX_Offset() {
 inline size_t Get_SE_POS_Offset() {
     static size_t off = 0;
     if (off == 0) { 
-        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition"); 
-        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position");
+        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position"); 
+        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition");
         if (off == 0) off = 0x294; 
     }
     return off;

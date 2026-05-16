@@ -203,9 +203,18 @@
                  g_Battle.heroes_render.size(), g_Battle.dbg_dicPlayerCount,
                  g_Battle.monsters_render.size(),
                  g_Battle.localCamp, GetCameraMain());
-                 
-        ImGui::GetBackgroundDrawList()->AddText(ImVec2(50, 50), IM_COL32(0, 255, 0, 255), debugStr);
+        char extraStr[256] = "";
+        if (!g_Battle.heroes_render.empty()) {
+            for (auto& e : g_Battle.heroes_render) {
+                if (e.camp != g_Battle.localCamp && !e.isSelf) {
+                    snprintf(extraStr, sizeof(extraStr), "\nEnemyPos: %.2f, %.2f, %.2f", e.pos.x, e.pos.y, e.pos.z);
+                    break;
+                }
+            }
+        }
         
+        std::string finalDebugStr = std::string(debugStr) + extraStr;
+        ImGui::GetBackgroundDrawList()->AddText(ImVec2(50, 50), IM_COL32(0, 255, 0, 255), finalDebugStr.c_str());
         // Panggil ESP Core (hanya jika fitur aktif)
         if (g_Battle.isValid) {
             SyncFeatureToESP();
