@@ -149,17 +149,29 @@ inline void ReadBase(EntityData& e) {
     e.mp     = ReadInt32(p + OFF_SE_MP);
     e.mpMax  = ReadInt32(p + OFF_SE_MP_MAX);
 
-    // Position
-    void* get_pos_method = Get_ShowEntity_get_position();
-    if (get_pos_method) {
-        // C-style function call to Unity managed method
-        // Using pure C struct UnityVector3 for correct AAPCS64 HFA passing
-        struct UnityVector3 { float x, y, z; };
-        UnityVector3 pos = reinterpret_cast<UnityVector3(*)(void*)>(get_pos_method)((void*)p);
-        e.pos.x = pos.x;
-        e.pos.y = pos.y;
-        e.pos.z = pos.z;
-    } else {
+    // Position (Prioritize LogicFighter VInt3 for dynamic movements)
+    bool posFound = false;
+    size_t offLogicFighter = Get_SE_LogicFighter_Offset();
+    if (offLogicFighter != 0) {
+        uintptr_t pLogicFighter = ReadPtr(p + offLogicFighter);
+        if (pLogicFighter) {
+            size_t offPos = Get_LogicEntity_Position_Offset();
+            if (offPos != 0) {
+                int vx = ReadInt32(pLogicFighter + offPos);
+                int vy = ReadInt32(pLogicFighter + offPos + 4);
+                int vz = ReadInt32(pLogicFighter + offPos + 8);
+                // VInt3 is scaled by 10000 in MLBB
+                e.pos.x = (float)vx / 10000.0f;
+                e.pos.y = (float)vy / 10000.0f;
+                e.pos.z = (float)vz / 10000.0f;
+                
+                if (vx != 0 || vz != 0) posFound = true;
+            }
+        }
+    }
+    
+    // Fallback ke _Position/m_vCachePosition jika LogicFighter tidak ditemukan (Towers)
+    if (!posFound) {
         e.pos.x = ReadFloat(p + OFF_POS_X);
         e.pos.y = ReadFloat(p + OFF_POS_Y);
         e.pos.z = ReadFloat(p + OFF_POS_Z);

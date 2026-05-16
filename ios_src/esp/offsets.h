@@ -118,6 +118,18 @@ inline void* Get_ShowEntity_get_position() {
     return method;
 }
 
+inline size_t Get_SE_LogicFighter_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_logicFighter"); }
+    return off;
+}
+
+inline size_t Get_LogicEntity_Position_Offset() {
+    static size_t off = 0;
+    if (off == 0) { off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "Battle", "LogicEntity", "m_Position"); }
+    return off;
+}
+
 // ---- EntityBase HP fields (ShowEntity offset basis dynamically resolved) ----
 #define OFF_SE_GUID             Get_SE_GUID_Offset()
 #define OFF_SE_ID               Get_SE_ID_Offset()
