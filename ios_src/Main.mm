@@ -48,12 +48,14 @@ void* MemoryThread(void* arg) {
             }
         }
         
-        // Seperti di Code Breaker: iBattleState == 2 || iBattleState == 3 berarti sedang di dalam match/room
-        if (bmInst && logicBmInst && (battleState == 2 || battleState == 3)) {
+        // Kita hapus pengecekan ketat battleState == 2 || 3 dari Code Breaker
+        // karena di iOS ini kadang menyebabkan ESP tidak jalan (method/offset gagal dipanggil atau enum berbeda).
+        // Selama GameLogic dan LogicBattleManager tidak null, kita asumsikan sedang di match!
+        if (bmInst && logicBmInst) {
             // Karena pointer ini adalah objek Il2Cpp langsung, kita casting ke uintptr_t
             g_Battle.Update((uintptr_t)bmInst, (uintptr_t)logicBmInst);
         } else {
-            g_Battle.isValid = false; // Disable ESP di Lobby
+            g_Battle.isValid = false; // Disable ESP di Lobby jika pointer null
         }
         
         usleep(30000); // 30ms sleep (~33 fps ESP update rate)

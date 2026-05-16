@@ -90,11 +90,10 @@
     
     ImGui::StyleColorsDark();
     
-    // Scale ImGui for iOS Retina Displays agar tidak terlalu kecil (tapi jangan terlalu besar)
-    CGFloat scale = [UIScreen mainScreen].scale;
-    // Gunakan nilai tengah agar UI seimbang (1.5x) daripada skala penuh retina (3x) yang kebesaran
-    ImGui::GetStyle().ScaleAllSizes(1.5f);
-    io.FontGlobalScale = 1.3f; // Besarkan font secukupnya
+    // Kembalikan skala ke normal (1.0x) agar menu tidak 'gede banget'
+    // DisplayFramebufferScale sudah cukup untuk membuat resolusinya tajam di Retina
+    ImGui::GetStyle().ScaleAllSizes(1.0f);
+    io.FontGlobalScale = 1.0f;
     
     ImGui_ImplMetal_Init(self.device);
     
