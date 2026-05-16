@@ -97,9 +97,18 @@
 // Meneruskan touch ke game jika menu ImGui tidak disentuh
 - (UIView *)hitTest:(CGPoint)point withEvent:(UIEvent *)event {
     ImGuiIO& io = ImGui::GetIO();
-    if (io.WantCaptureMouse || bShowMenu) {
+    
+    if (bShowMenu) {
         return [super hitTest:point withEvent:event];
     }
+    
+    // Jika menu tertutup, cek apakah touch mengenai tombol toggle (CBZ)
+    // Posisi tombol toggle di ui_menu.h: x=20, y=DisplaySize.y - 140, w=140, h=140
+    CGRect toggleButtonRect = CGRectMake(20, self.bounds.size.height - 140, 140, 140);
+    if (CGRectContainsPoint(toggleButtonRect, point)) {
+        return [super hitTest:point withEvent:event];
+    }
+    
     return nil;
 }
 
