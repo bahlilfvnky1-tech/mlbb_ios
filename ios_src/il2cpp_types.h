@@ -16,7 +16,7 @@ struct Il2CppString {
     char chars[1]; // UTF-16 chars, variable length
 
     std::string toString() {
-        if (!this || length <= 0 || length > 512) return "";
+        if (length <= 0 || length > 512) return "";
         std::string result;
         result.reserve(length);
         char16_t* wchars = reinterpret_cast<char16_t*>(chars);
@@ -83,26 +83,6 @@ struct Il2CppDictionary {
     Il2CppArray<TKey> *keys;
     Il2CppArray<TValue> *values;
     void *syncRoot;
-
-    // Persis seperti Code Breaker getKeys()
-    std::vector<TKey> getKeys() {
-        std::vector<TKey> ret;
-        if (!entries) return ret;
-        auto lst = entries->template toCPPlist();
-        for (auto& enter : lst)
-            ret.push_back(enter.key);
-        return ret;
-    }
-
-    // Persis seperti Code Breaker getValues()
-    std::vector<TValue> getValues() {
-        std::vector<TValue> ret;
-        if (!entries) return ret;
-        auto lst = entries->template toCPPlist();
-        for (auto& enter : lst)
-            ret.push_back(enter.value);
-        return ret;
-    }
 
     int getNumKeys() { return count; }
 };
