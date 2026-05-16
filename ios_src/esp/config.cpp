@@ -1,0 +1,42 @@
+#include "config.h"
+
+// Variables Dummy
+bool bShowMenu = false;
+bool bFlagAutoResize = false;
+float window_scale = 1.0f;
+bool bFullChecked = false;
+std::string tittle = "MLBB Internal iOS";
+std::string toastsaveload = "";
+int screenWidth = 0;
+int screenHeight = 0;
+
+FeatureState Feature;
+EspConfig g_ESPCfg;
+
+// Variabel Auto Retri
+bool AutoRetriEnabled = false;
+bool RetriLord = true;
+bool RetriTurtle = true;
+bool RetriCrab = false;
+bool RetriBuff = false;
+bool RetriLitho = false;
+ImVec2 RetriPos = ImVec2(0,0);
+
+// UI & Menu Variables
+float SetFieldOfView = 1.0f;
+bool AutoLoadSettings = false;
+
+// Posisi & Ukuran
+Vector2D StartPos = {0, 0};
+int MapSize = 100;
+int ICSize = 30;
+int ICHealthThin = 5;
+bool isTeam = false;
+bool isEnemy = true;
+int selectedOption = 0;
+
+// Dummy implementation for LoadTextureFromFile
+typedef unsigned int GLuint;
+GLuint LoadTextureFromFile(const char* filename) {
+    return 0; // Return 0 (no texture)
+}
