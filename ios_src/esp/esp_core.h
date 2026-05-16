@@ -50,6 +50,9 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
     return false;
 }
 
+// Forward declaration untuk menghindari circular dependency
+void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float screenH, bool hasSelf, const ImVec2& selfPosVec2);
+
 inline void RenderESPCore() {
     // Dapatkan instance Camera.main dari Unity
     void* cameraMain = GetCameraMain();
