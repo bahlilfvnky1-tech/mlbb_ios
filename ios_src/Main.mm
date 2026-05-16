@@ -36,9 +36,24 @@ void* MemoryThread(void* arg) {
         // Dapatkan static field Instance dari LogicBattleManager
         Il2CppGetStaticFieldValue("Assembly-CSharp.dll", "", "LogicBattleManager", "Instance", &logicBmInst);
         
-        if (bmInst && logicBmInst) {
+        int battleState = 0;
+        if (logicBmInst) {
+            static void* getBattleStateMethod = nullptr;
+            if (!getBattleStateMethod) {
+                getBattleStateMethod = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "LogicBattleManager", "GetBattleState", 0);
+            }
+            if (getBattleStateMethod) {
+                // Di ARM64 iOS, calling convention default adalah yang digunakan, cukup cast ke int(*)(void*)
+                battleState = reinterpret_cast<int(*)(void*)>(getBattleStateMethod)(logicBmInst);
+            }
+        }
+        
+        // Seperti di Code Breaker: iBattleState == 2 || iBattleState == 3 berarti sedang di dalam match/room
+        if (bmInst && logicBmInst && (battleState == 2 || battleState == 3)) {
             // Karena pointer ini adalah objek Il2Cpp langsung, kita casting ke uintptr_t
             g_Battle.Update((uintptr_t)bmInst, (uintptr_t)logicBmInst);
+        } else {
+            g_Battle.isValid = false; // Disable ESP di Lobby
         }
         
         usleep(30000); // 30ms sleep (~33 fps ESP update rate)

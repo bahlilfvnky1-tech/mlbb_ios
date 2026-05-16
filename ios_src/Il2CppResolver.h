@@ -20,3 +20,4 @@ void *Il2CppGetImageByName(const char *image);
 void *Il2CppGetClassType(const char *image, const char *namespaze, const char *clazz);
 void Il2CppGetStaticFieldValue(const char *image, const char *namespaze, const char *clazz, const char *name, void *output);
 size_t Il2CppGetFieldOffset(const char *image, const char *namespaze, const char *clazz, const char *name);
+void *Il2CppGetMethodOffset(const char *image, const char *namespaze, const char *clazz, const char *name, int argsCount);

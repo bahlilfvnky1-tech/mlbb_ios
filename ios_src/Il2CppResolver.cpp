@@ -109,3 +109,13 @@ size_t Il2CppGetFieldOffset(const char *image, const char *namespaze, const char
     }
     return -1;
 }
+
+void *Il2CppGetMethodOffset(const char *image, const char *namespaze, const char *clazz, const char *name, int argsCount) {
+    void *klass = Il2CppGetClassType(image, namespaze, clazz);
+    if (!klass) return nullptr;
+    
+    void **method = (void **)il2cpp_class_get_method_from_name(klass, name, argsCount);
+    if (!method) return nullptr;
+    
+    return *method;
+}
