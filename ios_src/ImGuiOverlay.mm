@@ -179,6 +179,9 @@
         // Panggil Menu UI
         // ShowMenu() sudah dipanggil di atas
         
+        // Sinkronisasi data entitas dari thread pemindai memori
+        g_Battle.SwapBuffers();
+        
         // DEBUG TEXT DI LAYAR
         char debugStr[768];
         snprintf(debugStr, sizeof(debugStr), 
