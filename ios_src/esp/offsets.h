@@ -157,3 +157,10 @@
 #define OFF_CDD_STARTTIME  0x1c  // UInt32 uiStartTime
 #define OFF_CDD_ISCOOLDOWN 0x20  // Boolean m_isCoolDown
 
+namespace InternalMemory {
+    // TODO: Ganti 0x0 dengan offset statis dari dump.cs iOS Anda
+    // Cari class BattleManager dan LogicBattleManager, lalu lihat static field offset-nya
+    constexpr uintptr_t OFF_BATTLE_MANAGER = 0x0;       
+    constexpr uintptr_t OFF_LOGIC_BATTLE_MANAGER = 0x0; 
+}
+

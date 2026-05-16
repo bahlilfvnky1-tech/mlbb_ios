@@ -1,11 +1,10 @@
 #import <Foundation/Foundation.h>
 #import <UIKit/UIKit.h>
-#import <Metal/Metal.h>
-#import <MetalKit/MetalKit.h>
 #include <mach-o/dyld.h>
 #include <pthread.h>
 #include <dlfcn.h>
 #include "memory_internal.h"
+#include "esp/entity.h"
 
 #import "ImGuiOverlay.h"
 
@@ -34,10 +33,10 @@ void* MemoryThread(void* arg) {
     
     while(true) {
         if (g_il2cppBase > 0) {
-            uintptr_t logicBmPtr = InternalMemory::Read<uintptr_t>(g_il2cppBase + Memory::OFF_LOGIC_BATTLE_MANAGER);
+            uintptr_t logicBmPtr = InternalMemory::Read<uintptr_t>(g_il2cppBase + InternalMemory::OFF_LOGIC_BATTLE_MANAGER);
             uintptr_t logicBmIns = InternalMemory::Read<uintptr_t>(logicBmPtr + 0xB8);
             
-            uintptr_t bmPtr = InternalMemory::Read<uintptr_t>(g_il2cppBase + Memory::OFF_BATTLE_MANAGER);
+            uintptr_t bmPtr = InternalMemory::Read<uintptr_t>(g_il2cppBase + InternalMemory::OFF_BATTLE_MANAGER);
             uintptr_t bmIns = InternalMemory::Read<uintptr_t>(bmPtr + 0xB8);
             
             if (bmIns && logicBmIns) {
