@@ -52,9 +52,9 @@ void* MemoryThread(void* arg) {
         g_Battle.dbg_logicBmInst = (uintptr_t)logicBmInst;
         g_Battle.dbg_battleState = battleState;
 
-        // Kembalikan ke logika Code Breaker asli:
-        // Harus mengecek battleState == 2 || battleState == 3 (berarti sedang dalam match/room)
-        if (bmInst && logicBmInst && (battleState == 2 || battleState == 3)) {
+        // Berdasarkan Screenshot, BattleState saat In-Game adalah 6!
+        // Jadi kita ubah pengecekan menjadi battleState >= 2 (bukan hanya 2 atau 3)
+        if (bmInst && logicBmInst && battleState >= 2) {
             // Karena pointer ini adalah objek Il2Cpp langsung, kita casting ke uintptr_t
             g_Battle.Update((uintptr_t)bmInst, (uintptr_t)logicBmInst);
         } else {
