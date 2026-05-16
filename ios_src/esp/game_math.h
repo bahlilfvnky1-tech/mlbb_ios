@@ -24,6 +24,13 @@ struct Vec3 {
     float Dist(const Vec3& o) const { return (*this - o).Length(); }
 };
 
+// Pure C struct agar Clang ARM64 compiler memperlakukannya sebagai HFA (pass/return via s0-s2 registers)
+struct UnityVector3 {
+    float x;
+    float y;
+    float z;
+};
+
 struct Matrix4x4 {
     float m[4][4];
 };

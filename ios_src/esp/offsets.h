@@ -110,6 +110,14 @@ inline size_t Get_SE_POS_Offset() {
     return off;
 }
 
+inline void* Get_ShowEntity_get_position() {
+    static void* method = nullptr;
+    if (!method) {
+        method = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "ShowEntity", "get_position", 0);
+    }
+    return method;
+}
+
 // ---- EntityBase HP fields (ShowEntity offset basis dynamically resolved) ----
 #define OFF_SE_GUID             Get_SE_GUID_Offset()
 #define OFF_SE_ID               Get_SE_ID_Offset()

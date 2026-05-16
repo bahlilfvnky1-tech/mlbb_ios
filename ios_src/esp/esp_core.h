@@ -28,12 +28,7 @@ inline void* GetCameraMain() {
     return nullptr;
 }
 
-// Pure C struct agar Clang ARM64 compiler memperlakukannya sebagai HFA (pass/return via s0-s2 registers)
-struct UnityVector3 {
-    float x;
-    float y;
-    float z;
-};
+
 
 inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, float screenH) {
     if (!camera) return false;

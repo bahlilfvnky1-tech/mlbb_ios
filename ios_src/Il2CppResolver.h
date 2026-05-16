@@ -14,6 +14,7 @@ extern "C" {
     extern size_t (*il2cpp_field_get_offset)(void *field);
     extern void (*il2cpp_field_static_get_value)(void *field, void *value);
     extern void (*il2cpp_field_static_set_value)(void *field, void *value);
+    extern void *(*il2cpp_thread_attach)(void *domain);
 }
 
 bool Il2CppAttach();

@@ -18,6 +18,12 @@ void* MemoryThread(void* arg) {
     while (!Il2CppAttach()) {
         sleep(2);
     }
+    
+    if (il2cpp_thread_attach && il2cpp_domain_get) {
+        void* domain = il2cpp_domain_get();
+        if (domain) il2cpp_thread_attach(domain);
+    }
+    
     NSLog(@"[Cheat] Il2Cpp Attached Successfully!");
     
     // SANGAT PENTING: Tunggu game sampai benar-benar masuk ke menu/loading screen

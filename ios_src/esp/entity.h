@@ -150,9 +150,20 @@ inline void ReadBase(EntityData& e) {
     e.mpMax  = ReadInt32(p + OFF_SE_MP_MAX);
 
     // Position
-    e.pos.x = ReadFloat(p + OFF_POS_X);
-    e.pos.y = ReadFloat(p + OFF_POS_Y);
-    e.pos.z = ReadFloat(p + OFF_POS_Z);
+    void* get_pos_method = Get_ShowEntity_get_position();
+    if (get_pos_method) {
+        // C-style function call to Unity managed method
+        // Using pure C struct UnityVector3 for correct AAPCS64 HFA passing
+        struct UnityVector3 { float x, y, z; };
+        UnityVector3 pos = reinterpret_cast<UnityVector3(*)(void*)>(get_pos_method)((void*)p);
+        e.pos.x = pos.x;
+        e.pos.y = pos.y;
+        e.pos.z = pos.z;
+    } else {
+        e.pos.x = ReadFloat(p + OFF_POS_X);
+        e.pos.y = ReadFloat(p + OFF_POS_Y);
+        e.pos.z = ReadFloat(p + OFF_POS_Z);
+    }
 
     // Type
     if (e.isBoss)    e.type = EntityType::Boss;

@@ -16,6 +16,7 @@ extern "C" {
     size_t (*il2cpp_field_get_offset)(void *field) = nullptr;
     void (*il2cpp_field_static_get_value)(void *field, void *value) = nullptr;
     void (*il2cpp_field_static_set_value)(void *field, void *value) = nullptr;
+    void *(*il2cpp_thread_attach)(void *domain) = nullptr;
 }
 
 bool Il2CppAttach() {
@@ -46,6 +47,7 @@ bool Il2CppAttach() {
     il2cpp_field_get_offset = (size_t (*)(void *)) dlsym(handle, "il2cpp_field_get_offset");
     il2cpp_field_static_get_value = (void (*)(void *, void *)) dlsym(handle, "il2cpp_field_static_get_value");
     il2cpp_field_static_set_value = (void (*)(void *, void *)) dlsym(handle, "il2cpp_field_static_set_value");
+    il2cpp_thread_attach = (void *(*)(void *)) dlsym(handle, "il2cpp_thread_attach");
 
     return true;
 }
