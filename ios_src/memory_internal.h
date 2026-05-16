@@ -1,6 +1,7 @@
 #pragma once
 #include <stdint.h>
 #include <string.h>
+#include <string>
 
 // Dalam arsitektur internal (iOS dylib), kita memodifikasi kelas Memory
 // agar tidak membaca file /proc/pid/mem, melainkan menggunakan pointer langsung.
@@ -8,16 +9,15 @@
 
 extern uintptr_t g_il2cppBase;
 
-class InternalMemory {
-public:
+namespace InternalMemory {
     template<typename T>
-    static T Read(uintptr_t address) {
+    inline T Read(uintptr_t address) {
         // Validasi dasar agar game tidak crash jika pointer kosong
         if (address < 0x100000000) return T{}; 
         return *(T*)address;
     }
     
-    static bool ReadRaw(uintptr_t address, void* buffer, size_t size) {
+    inline bool ReadRaw(uintptr_t address, void* buffer, size_t size) {
         if (address < 0x100000000) return false;
         memcpy(buffer, (void*)address, size);
         return true;
@@ -25,9 +25,27 @@ public:
 
     // Karena ini internal cheat, menulis memori langsung bisa dilakukan dengan mudah
     template<typename T>
-    static bool Write(uintptr_t address, T value) {
+    inline bool Write(uintptr_t address, T value) {
         if (address < 0x100000000) return false;
         *(T*)address = value;
         return true;
     }
-};
+
+    // Helper wrappers
+    inline bool ReadBool(uintptr_t address) { return Read<bool>(address); }
+    inline int32_t ReadInt32(uintptr_t address) { return Read<int32_t>(address); }
+    inline float ReadFloat(uintptr_t address) { return Read<float>(address); }
+    inline uintptr_t ReadPtr(uintptr_t address) { return Read<uintptr_t>(address); }
+    
+    inline std::string ReadIL2CppString(uintptr_t strPtr) {
+        if (!strPtr) return "";
+        int32_t len = ReadInt32(strPtr + 0x10);
+        if (len <= 0 || len > 256) return "";
+        char buf[512] = {};
+        for (int i = 0; i < len && i < 128; i++) {
+            uint16_t ch = Read<uint16_t>(strPtr + 0x14 + i * 2);
+            buf[i] = (ch < 128) ? (char)ch : '?';
+        }
+        return std::string(buf);
+    }
+}
