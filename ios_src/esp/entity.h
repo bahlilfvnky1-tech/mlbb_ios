@@ -3,6 +3,7 @@
 #include <string>
 #include <mutex>
 #include "../Il2CppResolver.h"
+#include "../il2cpp_types.h"
 #include "../memory_internal.h"
 #include "offsets.h"
 #include "game_math.h"
@@ -210,6 +211,9 @@ struct BattleState {
     size_t dbg_dicPlayerOff = 0;
     uintptr_t dbg_dicPlayerPtr = 0;
     int dbg_dicPlayerCount = 0;
+    uintptr_t dbg_entriesPtr = 0;
+    uintptr_t dbg_firstEntityPtr = 0;
+    int dbg_entriesMaxLen = 0;
     
     std::mutex m_mutex;
 
@@ -261,110 +265,97 @@ struct BattleState {
             t_localCamp = ReadInt32(t_localPlayerPtr + OFF_SHOW_CAMP);
         }
 
-        // ---- Read ShowPlayers (PERSIS Code Breaker: Dictionary<int,uintptr_t>) ----
-        // Dictionary layout (from Code Breaker Il2Cpp.h):
-        //   +0x10 = *buckets    +0x18 = *entries    +0x20 = count
-        //   +0x38 = *keys array +0x40 = *values array (Array<uintptr_t>)
-        // Code Breaker getValues() iterates entries->vector[i].value
-        // Kita gunakan values array langsung (lebih simpel dan akurat)
+        // ============================================================
+        // Read Players via m_dicPlayerShow - PERSIS CODE BREAKER
+        // Menggunakan direct pointer casting (bukan manual offset)
+        // ============================================================
         size_t offset_dicPlayer = Get_dicPlayerShow_Offset();
-        uintptr_t dicPlayersPtr = ReadPtr(bmPtr + offset_dicPlayer);
+        auto* m_dicPlayerShow = *(Il2CppDictionary<int, uintptr_t>**)(bmPtr + offset_dicPlayer);
+        uintptr_t dicPlayersPtr = (uintptr_t)m_dicPlayerShow;
         int parsedPlayersCount = 0;
+        uintptr_t dbg_entries_local = 0;
+        uintptr_t dbg_firstEntity_local = 0;
+        int dbg_entriesMaxLen_local = 0;
         
-        if (dicPlayersPtr && dicPlayersPtr > 0x100000000ULL) {
-            int32_t dicCount = ReadInt32(dicPlayersPtr + 0x20); // count = getNumKeys()
-            parsedPlayersCount = dicCount;
+        if (m_dicPlayerShow) {
+            parsedPlayersCount = m_dicPlayerShow->count;
             
-            // Path 1: baca dari values array (Dictionary+0x40) seperti getValues()
-            uintptr_t valuesArr = ReadPtr(dicPlayersPtr + 0x40);
-            if (valuesArr && valuesArr > 0x100000000ULL && dicCount > 0 && dicCount <= 50) {
-                // Array<uintptr_t>: header 0x20, lalu vector[i] each 8 bytes
-                for (int i = 0; i < dicCount; i++) {
-                    uintptr_t entityPtr = ReadPtr(valuesArr + 0x20 + i * 8);
+            // PERSIS Code Breaker: iterate entries->vector[i].value
+            if (m_dicPlayerShow->entries) {
+                dbg_entries_local = (uintptr_t)m_dicPlayerShow->entries;
+                dbg_entriesMaxLen_local = m_dicPlayerShow->entries->max_length;
+                
+                int numEntries = m_dicPlayerShow->entries->max_length;
+                if (numEntries > 50) numEntries = 50;
+                
+                for (int i = 0; i < numEntries; i++) {
+                    auto& entry = m_dicPlayerShow->entries->vector[i];
+                    if (entry.hashCode < 0) continue; // Empty slot
+                    
+                    uintptr_t entityPtr = entry.value;
+                    if (i == 0) dbg_firstEntity_local = entityPtr;
                     if (!entityPtr || entityPtr < 0x100000000ULL) continue;
+                    
                     EntityData e;
                     e.ptr = entityPtr;
                     EntityReader::ReadBase(e);
-                    e.isPlayer = true; e.type = EntityType::Hero;
+                    e.isPlayer = true;
+                    e.type = EntityType::Hero;
                     EntityReader::ReadPlayerExtra(e);
                     e.isSelf = (entityPtr == t_localPlayerPtr);
                     tempHeroes.push_back(e);
                 }
-            } else {
-                // Path 2 (fallback): baca dari entries array
-                uintptr_t entriesArr = ReadPtr(dicPlayersPtr + 0x18);
-                if (entriesArr && dicCount > 0 && dicCount <= 50) {
-                    for (int i = 0; i < dicCount; i++) {
-                        // Entry<int,uintptr_t>=24 bytes, value at +16
-                        uintptr_t entityPtr = ReadPtr(entriesArr + 0x20 + i * 24 + 16);
-                        if (!entityPtr || entityPtr < 0x100000000ULL) continue;
-                        EntityData e;
-                        e.ptr = entityPtr;
-                        EntityReader::ReadBase(e);
-                        e.isPlayer = true; e.type = EntityType::Hero;
-                        EntityReader::ReadPlayerExtra(e);
-                        e.isSelf = (entityPtr == t_localPlayerPtr);
-                        tempHeroes.push_back(e);
-                    }
-                }
             }
         }
 
-        // ---- Read ShowMonsters (List) ----
-        uintptr_t monstersListPtr = ReadPtr(bmPtr + Get_ShowMonsters_Offset());
-        if (monstersListPtr) {
-            int32_t size = ReadInt32(monstersListPtr + OFF_LIST_SIZE);
-            uintptr_t itemsArr = ReadPtr(monstersListPtr + OFF_LIST_ITEMS);
-            if (size > 0 && size <= 500 && itemsArr) {
+        // ============================================================
+        // Read Monsters via m_ShowMonsters (List) - PERSIS CODE BREAKER
+        // ============================================================
+        size_t offset_showMonsters = Get_ShowMonsters_Offset();
+        auto* m_ShowMonsters = *(Il2CppList<uintptr_t>**)(bmPtr + offset_showMonsters);
+        if (m_ShowMonsters && m_ShowMonsters->items) {
+            int size = m_ShowMonsters->size;
+            if (size > 0 && size <= 500) {
                 for (int i = 0; i < size; i++) {
-                    uintptr_t entityPtr = ReadPtr(itemsArr + OFF_ARRAY_FIRST_ITEM + i * 8);
+                    uintptr_t entityPtr = m_ShowMonsters->items->vector[i];
                     if (!entityPtr) continue;
                     EntityData e;
                     e.ptr = entityPtr;
                     EntityReader::ReadBase(e);
                     e.isMonster = true;
-                    if (e.isBoss) {
-                        e.type = EntityType::Boss;
-                    } else {
-                        e.type = EntityType::Monster;
-                    }
+                    if (e.isBoss) e.type = EntityType::Boss;
+                    else e.type = EntityType::Monster;
                     EntityReader::ReadMonsterName(e);
                     tempMonsters.push_back(e);
                 }
             }
         }
 
-        // ---- Read ShowMonsters (Dictionary - Supplement) ----
-        uintptr_t dicMonstersPtr = ReadPtr(bmPtr + Get_dicMonsterShow_Offset());
-        if (dicMonstersPtr && dicMonstersPtr > 0x100000000ULL) {
-            uintptr_t entries = ReadPtr(dicMonstersPtr + 0x18);
-            int32_t dicCount = ReadInt32(dicMonstersPtr + 0x20);
-            if (dicCount <= 0 || dicCount > 500) {
-                dicCount = ReadInt32(dicMonstersPtr + 0x40);
-            }
-            if (entries && dicCount > 0 && dicCount <= 500) {
-                for (int i = 0; i < dicCount; i++) {
-                    uintptr_t entityPtr = ReadPtr(entries + 0x20 + (i * 24) + 16);
-                    if (entityPtr > 0x7000000000ULL) {
-                        // Check if already in tempMonsters
-                        bool dup = false;
-                        for (auto& m : tempMonsters) {
-                            if (m.ptr == entityPtr) { dup = true; break; }
-                        }
-                        if (!dup) {
-                            EntityData e;
-                            e.ptr = entityPtr;
-                            EntityReader::ReadBase(e);
-                            e.isMonster = true;
-                            if (e.isBoss) {
-                                e.type = EntityType::Boss;
-                            } else {
-                                e.type = EntityType::Monster;
-                            }
-                            EntityReader::ReadMonsterName(e);
-                            tempMonsters.push_back(e);
-                        }
-                    }
+        // ---- Read Monsters (Dictionary supplement) ----
+        size_t offset_dicMonster = Get_dicMonsterShow_Offset();
+        auto* m_dicMonsterShow = *(Il2CppDictionary<int, uintptr_t>**)(bmPtr + offset_dicMonster);
+        if (m_dicMonsterShow && m_dicMonsterShow->entries) {
+            int numEntries = m_dicMonsterShow->entries->max_length;
+            if (numEntries > 500) numEntries = 500;
+            for (int i = 0; i < numEntries; i++) {
+                auto& entry = m_dicMonsterShow->entries->vector[i];
+                if (entry.hashCode < 0) continue;
+                uintptr_t entityPtr = entry.value;
+                if (!entityPtr || entityPtr < 0x100000000ULL) continue;
+                // Dedup
+                bool dup = false;
+                for (auto& m : tempMonsters) {
+                    if (m.ptr == entityPtr) { dup = true; break; }
+                }
+                if (!dup) {
+                    EntityData e;
+                    e.ptr = entityPtr;
+                    EntityReader::ReadBase(e);
+                    e.isMonster = true;
+                    if (e.isBoss) e.type = EntityType::Boss;
+                    else e.type = EntityType::Monster;
+                    EntityReader::ReadMonsterName(e);
+                    tempMonsters.push_back(e);
                 }
             }
         }
@@ -543,6 +534,9 @@ struct BattleState {
             dbg_dicPlayerOff = offset_dicPlayer;
             dbg_dicPlayerPtr = dicPlayersPtr;
             dbg_dicPlayerCount = parsedPlayersCount;
+            dbg_entriesPtr = dbg_entries_local;
+            dbg_firstEntityPtr = dbg_firstEntity_local;
+            dbg_entriesMaxLen = dbg_entriesMaxLen_local;
             
             isValid = true;
         }

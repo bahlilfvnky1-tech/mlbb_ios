@@ -180,10 +180,22 @@
         // ShowMenu() sudah dipanggil di atas
         
         // DEBUG TEXT DI LAYAR
-        char debugStr[512];
-        snprintf(debugStr, sizeof(debugStr), "DEBUG:\nBattleState: %d\nbmInst: %p\nlogicBmInst: %p\ndicPlayerOff: 0x%zx\ndicPlayerPtr: 0x%lx\nHeroes: %zu / count: %d\nMonsters: %zu", 
+        char debugStr[768];
+        snprintf(debugStr, sizeof(debugStr), 
+                 "DEBUG:\n"
+                 "BattleState: %d\n"
+                 "bmInst: %p\n"
+                 "logicBmInst: %p\n"
+                 "dicPlayerOff: 0x%zx\n"
+                 "dicPlayerPtr: 0x%lx\n"
+                 "entries: 0x%lx (maxLen: %d)\n"
+                 "1stEntity: 0x%lx\n"
+                 "Heroes: %zu / count: %d\n"
+                 "Monsters: %zu", 
                  g_Battle.dbg_battleState, (void*)g_Battle.dbg_bmInst, (void*)g_Battle.dbg_logicBmInst,
                  g_Battle.dbg_dicPlayerOff, g_Battle.dbg_dicPlayerPtr,
+                 g_Battle.dbg_entriesPtr, g_Battle.dbg_entriesMaxLen,
+                 g_Battle.dbg_firstEntityPtr,
                  g_Battle.heroes_render.size(), g_Battle.dbg_dicPlayerCount,
                  g_Battle.monsters_render.size());
                  
