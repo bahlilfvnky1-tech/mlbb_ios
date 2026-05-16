@@ -271,6 +271,10 @@ struct BattleState {
     uintptr_t dbg_entriesPtr = 0;
     uintptr_t dbg_firstEntityPtr = 0;
     int dbg_entriesMaxLen = 0;
+    size_t dbg_offLogicFighter = 0;
+    size_t dbg_offLogicPos = 0;
+    size_t dbg_offCachePos = 0;
+    size_t dbg_offPos = 0;
     
     std::mutex m_mutex;
 
@@ -321,6 +325,11 @@ struct BattleState {
         if (t_localPlayerPtr) {
             t_localCamp = ReadInt32(t_localPlayerPtr + OFF_SHOW_CAMP);
         }
+        
+        dbg_offLogicFighter = Get_SE_LogicFighter_Offset();
+        dbg_offLogicPos = Get_LogicEntity_Position_Offset();
+        dbg_offCachePos = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition");
+        dbg_offPos = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position");
 
         // ============================================================
         // Read Players via m_dicPlayerShow - PERSIS CODE BREAKER

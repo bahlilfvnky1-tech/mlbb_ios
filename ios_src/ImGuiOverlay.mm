@@ -204,16 +204,21 @@
                  g_Battle.monsters_render.size(),
                  g_Battle.localCamp, GetCameraMain());
         char extraStr[256] = "";
+        snprintf(extraStr, sizeof(extraStr), "\nOffLogicF: 0x%zx | OffLogPos: 0x%zx\nOffCacheP: 0x%zx | OffPos: 0x%zx", 
+                 g_Battle.dbg_offLogicFighter, g_Battle.dbg_offLogicPos,
+                 g_Battle.dbg_offCachePos, g_Battle.dbg_offPos);
+        
+        char enemyStr[256] = "";
         if (!g_Battle.heroes_render.empty()) {
             for (auto& e : g_Battle.heroes_render) {
                 if (e.camp != g_Battle.localCamp && !e.isSelf) {
-                    snprintf(extraStr, sizeof(extraStr), "\nEnemyPos: %.2f, %.2f, %.2f", e.pos.x, e.pos.y, e.pos.z);
+                    snprintf(enemyStr, sizeof(enemyStr), "\nEnemyPos: %.2f, %.2f, %.2f", e.pos.x, e.pos.y, e.pos.z);
                     break;
                 }
             }
         }
         
-        std::string finalDebugStr = std::string(debugStr) + extraStr;
+        std::string finalDebugStr = std::string(debugStr) + extraStr + enemyStr;
         ImGui::GetBackgroundDrawList()->AddText(ImVec2(50, 50), IM_COL32(0, 255, 0, 255), finalDebugStr.c_str());
         // Panggil ESP Core (hanya jika fitur aktif)
         if (g_Battle.isValid) {

@@ -37,26 +37,16 @@ void* MemoryThread(void* arg) {
         // Dapatkan static field Instance dari LogicBattleManager
         Il2CppGetStaticFieldValue("Assembly-CSharp.dll", "", "LogicBattleManager", "Instance", &logicBmInst);
         
-        int battleState = 0;
-        if (logicBmInst) {
-            static void* getBattleStateMethod = nullptr;
-            if (!getBattleStateMethod) {
-                getBattleStateMethod = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "LogicBattleManager", "GetBattleState", 0);
-            }
-            if (getBattleStateMethod) {
-                // Di ARM64 iOS, calling convention default adalah yang digunakan, cukup cast ke int(*)(void*)
-                battleState = reinterpret_cast<int(*)(void*)>(getBattleStateMethod)(logicBmInst);
-            }
-        }
+        // SANGAT AMAN: Hapus total pemanggilan method `GetBattleState()`
+        // Karena memanggil method Il2Cpp dari background thread di iOS sering memicu `abort()` dari Unity Engine!
+        // Sebagai gantinya, kita cukup cek apakah `bmInst` dan `logicBmInst` tidak null.
+        // Jika tidak null, berarti kita sedang berada di dalam match/room.
         
         g_Battle.dbg_bmInst = (uintptr_t)bmInst;
         g_Battle.dbg_logicBmInst = (uintptr_t)logicBmInst;
-        g_Battle.dbg_battleState = battleState;
+        g_Battle.dbg_battleState = 6; // Dummy state for debug overlay
 
-        // Berdasarkan Screenshot, BattleState saat In-Game adalah 6!
-        // Jadi kita ubah pengecekan menjadi battleState >= 2 (bukan hanya 2 atau 3)
-        if (bmInst && logicBmInst && battleState >= 2) {
-            // Karena pointer ini adalah objek Il2Cpp langsung, kita casting ke uintptr_t
+        if (bmInst && logicBmInst) {
             g_Battle.Update((uintptr_t)bmInst, (uintptr_t)logicBmInst);
         } else {
             g_Battle.isValid = false; // Disable ESP di Lobby
