@@ -1,7 +1,8 @@
 #pragma once
 #include "imgui.h"
 #include "config.h"
-#include <GLES3/gl3.h>
+
+typedef unsigned int GLuint;
 
 extern GLuint GetHeroIcon(int heroId);
 
