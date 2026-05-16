@@ -51,12 +51,11 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
 }
 
 inline void RenderESPCore() {
-    // Dummy implementasi untuk iOS sampai offset matriks ditemukan
     // Dapatkan instance Camera.main dari Unity
     void* cameraMain = GetCameraMain();
     
-    // Nanti ganti dengan matriks kamera asli dari game (jika ada)
-    Matrix4x4 dummyMatrix = {};
+    ImDrawList* drawList = ImGui::GetBackgroundDrawList();
+    ImGuiIO& io = ImGui::GetIO();
     
     // Memanggil fungsi ESP dari esp_player.h
     DrawPlayerESP(drawList, cameraMain, io.DisplaySize.x, io.DisplaySize.y, false, ImVec2(0,0));
