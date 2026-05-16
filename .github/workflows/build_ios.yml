@@ -41,7 +41,7 @@ jobs:
           
           # Azule akan menyuntikkan dylib langsung ke executable utama (legends.app)
           # tanpa perlu melakukan rename manual pada UnityFramework
-          ~/Azule/azule -i "$IPA_FILE" -o . -n Mod_MLBB -f ios_src/libmlbb_cheat.dylib -s
+          ~/Azule/azule -i "$IPA_FILE" -o . -n Mod_MLBB -f "$(pwd)/ios_src/libmlbb_cheat.dylib" -s
           
           echo "✅ Injeksi berhasil"
         else
