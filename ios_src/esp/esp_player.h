@@ -17,7 +17,7 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         
         // --- 3D PERSPECTIVE HEIGHT ---
         Vec3 headPos3D = e.pos;
-        headPos3D.y += 0.8f; // Tinggi rata-rata monster di Unity world units
+        headPos3D.y += 1.4f; // Tinggi monster di Unity world units (proporsional)
         Vec2 headPosW2S;
         ImVec2 headPosVec2;
         if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
@@ -29,12 +29,14 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
         // ================== MONSTER ROUND / ICON ==================
-        float circleRadius = 6.0f / CurrentFOVScale;
-        draw->AddCircleFilled(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(160, 32, 240, 200));
-        draw->AddCircle(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
+        if (g_ESPCfg.ESPMRound) {
+            float circleRadius = 6.0f / CurrentFOVScale;
+            draw->AddCircleFilled(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(160, 32, 240, 200));
+            draw->AddCircle(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
+        }
         
         // ================== MONSTER NAME ==================
-        if (e.name.length() > 0) {
+        if (g_ESPCfg.ESPMName && e.name.length() > 0) {
             float fontSize = 16.0f / CurrentFOVScale;
             auto textSize = ImGui::CalcTextSize(e.name.c_str());
             float scaledTextWidth = (textSize.x * fontSize) / ImGui::GetFontSize();
@@ -45,23 +47,25 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         }
 
         // ================== MONSTER HEALTH ==================
-        float healthPercent = (float)e.hp / (float)e.hpMax;
-        ImU32 healthColor = IM_COL32(50, 255, 50, 255);
-        if (healthPercent <= 0.3f) healthColor = IM_COL32(255, 50, 50, 255);
-        else if (healthPercent <= 0.5f) healthColor = IM_COL32(255, 200, 50, 255);
-        
-        float healthBarWidth = 70.0f / CurrentFOVScale;
-        float healthBarHeight = 10.0f / CurrentFOVScale;
-        float healthBarX = rootPosVec2.x - (healthBarWidth / 2);
-        float baseY = rootPosVec2.y - 15 / CurrentFOVScale;
-        
-        ImVec2 bgStart = {healthBarX, baseY};
-        ImVec2 bgEnd = {healthBarX + healthBarWidth, baseY + healthBarHeight};
-        ImVec2 healthEnd = {healthBarX + (healthBarWidth * healthPercent), baseY + healthBarHeight};
-        
-        draw->AddRectFilled(bgStart, bgEnd, IM_COL32(0, 0, 0, 200), 2);
-        draw->AddRectFilled(bgStart, healthEnd, healthColor, 2);
-        draw->AddRect(bgStart, bgEnd, IM_COL32(255, 255, 255, 150), 2, 0, 1.0f);
+        if (g_ESPCfg.ESPMHealth) {
+            float healthPercent = (float)e.hp / (float)e.hpMax;
+            ImU32 healthColor = IM_COL32(50, 255, 50, 255);
+            if (healthPercent <= 0.3f) healthColor = IM_COL32(255, 50, 50, 255);
+            else if (healthPercent <= 0.5f) healthColor = IM_COL32(255, 200, 50, 255);
+            
+            float healthBarWidth = 70.0f / CurrentFOVScale;
+            float healthBarHeight = 10.0f / CurrentFOVScale;
+            float healthBarX = rootPosVec2.x - (healthBarWidth / 2);
+            float baseY = rootPosVec2.y - 15 / CurrentFOVScale;
+            
+            ImVec2 bgStart = {healthBarX, baseY};
+            ImVec2 bgEnd = {healthBarX + healthBarWidth, baseY + healthBarHeight};
+            ImVec2 healthEnd = {healthBarX + (healthBarWidth * healthPercent), baseY + healthBarHeight};
+            
+            draw->AddRectFilled(bgStart, bgEnd, IM_COL32(0, 0, 0, 200), 2);
+            draw->AddRectFilled(bgStart, healthEnd, healthColor, 2);
+            draw->AddRect(bgStart, bgEnd, IM_COL32(255, 255, 255, 150), 2, 0, 1.0f);
+        }
     }
 }
 
@@ -82,7 +86,7 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
         
         // --- 3D PERSPECTIVE HEIGHT (Lebih Akurat) ---
         Vec3 headPos3D = e.pos;
-        headPos3D.y += 0.8f; // Tinggi rata-rata hero di Unity world units
+        headPos3D.y += 1.4f; // Tinggi hero di Unity world units (proporsional)
         Vec2 headPosW2S;
         ImVec2 HeadPosVec2;
         if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
@@ -155,17 +159,16 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
             draw->AddRect(bgStart, bgEnd, IM_COL32(255, 255, 255, 230), 8, 0, 2.0f);
             
             std::string hpText = std::to_string(e.hp) + " / " + std::to_string(e.hpMax);
-            float baseHpFontSize = 20.0f;
-            float hpFontSize = baseHpFontSize / CurrentFOVScale;
+            float hpFontSize = 11.0f / CurrentFOVScale;
             
             auto hpTextSize = ImGui::CalcTextSize(hpText.c_str());
             float scaledHpTextWidth = (hpTextSize.x * hpFontSize) / ImGui::GetFontSize();
-            ImVec2 hpTextPos = {rootPosVec2.x - (scaledHpTextWidth / 2), baseY + (4.0f / CurrentFOVScale)};
+            ImVec2 hpTextPos = {rootPosVec2.x - (scaledHpTextWidth / 2), baseY + (2.0f / CurrentFOVScale)};
             
             draw->AddText(NULL, hpFontSize, ImVec2(hpTextPos.x + 1, hpTextPos.y + 1), IM_COL32(0, 0, 0, 255), hpText.c_str());
             draw->AddText(NULL, hpFontSize, hpTextPos, IM_COL32(255, 255, 255, 255), hpText.c_str());
             
-            baseY += healthBarHeight + (8.0f / CurrentFOVScale);
+            baseY += healthBarHeight + (5.0f / CurrentFOVScale);
         }
 
         // ================== NAME ==================
@@ -201,8 +204,8 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
 
         // ================== COOLDOWNS ==================
         if (g_ESPCfg.ESPSkillCD || g_ESPCfg.ESPSpellCD) {
-            float baseCdBoxSize = 48.0f;
-            float baseCdSpacing = 56.0f;
+            float baseCdBoxSize = 22.0f;
+            float baseCdSpacing = 26.0f;
             
             float cdBoxSize = baseCdBoxSize / CurrentFOVScale;
             float cdSpacing = baseCdSpacing / CurrentFOVScale;
