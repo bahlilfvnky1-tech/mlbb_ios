@@ -214,7 +214,10 @@
         if (!g_Battle.heroes_render.empty()) {
             for (auto& e : g_Battle.heroes_render) {
                 if (e.camp != g_Battle.localCamp && !e.isSelf) {
-                    snprintf(enemyStr, sizeof(enemyStr), "\nEnemyPos: %.2f, %.2f, %.2f", e.pos.x, e.pos.y, e.pos.z);
+                    snprintf(enemyStr, sizeof(enemyStr),
+                             "\nEnemyPos: %.2f, %.2f, %.2f\nGetPosFn: %p",
+                             e.pos.x, e.pos.y, e.pos.z,
+                             Get_ShowEntity_get_position());
                     break;
                 }
             }

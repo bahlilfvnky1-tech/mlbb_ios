@@ -149,28 +149,51 @@ inline void ReadBase(EntityData& e) {
     e.mp     = ReadInt32(p + OFF_SE_MP);
     e.mpMax  = ReadInt32(p + OFF_SE_MP_MAX);
 
-    // Position (Prioritize LogicFighter VInt3 for dynamic movements)
+    // Position — 3 metode, prioritas dari paling akurat:
     bool posFound = false;
-    size_t offLogicFighter = Get_SE_LogicFighter_Offset();
-    if (offLogicFighter != 0) {
-        uintptr_t pLogicFighter = ReadPtr(p + offLogicFighter);
-        if (pLogicFighter) {
-            size_t offPos = Get_LogicEntity_Position_Offset();
-            if (offPos != 0) {
-                int vx = ReadInt32(pLogicFighter + offPos);
-                int vy = ReadInt32(pLogicFighter + offPos + 4);
-                int vz = ReadInt32(pLogicFighter + offPos + 8);
-                // VInt3 is scaled by 10000 in MLBB
-                e.pos.x = (float)vx / 10000.0f;
-                e.pos.y = (float)vy / 10000.0f;
-                e.pos.z = (float)vz / 10000.0f;
-                
-                if (vx != 0 || vz != 0) posFound = true;
+
+    // ── Metode 1: ShowEntity.get_position() (Unity Transform, PALING AKURAT, real-time) ──
+    {
+        // Cache pointer method sekali — lazy init, aman karena dipanggil dari satu thread scanner
+        static void* s_get_pos_fn = nullptr;
+        if (!s_get_pos_fn) s_get_pos_fn = Get_ShowEntity_get_position();
+        
+        if (s_get_pos_fn) {
+            auto fn = reinterpret_cast<UnityVector3(*)(void*)>(s_get_pos_fn);
+            UnityVector3 v = fn(reinterpret_cast<void*>(p));
+            // Abaikan jika nilai tampak nol/garbage (entity belum diinit)
+            if (v.x != 0.0f || v.z != 0.0f) {
+                e.pos.x = v.x;
+                e.pos.y = v.y;
+                e.pos.z = v.z;
+                posFound = true;
             }
         }
     }
-    
-    // Fallback ke _Position/m_vCachePosition jika LogicFighter tidak ditemukan (Towers)
+
+    // ── Metode 2: LogicFighter VInt3 (akurat untuk hero, bergerak dinamis) ──
+    if (!posFound) {
+        size_t offLogicFighter = Get_SE_LogicFighter_Offset();
+        if (offLogicFighter != 0) {
+            uintptr_t pLogicFighter = ReadPtr(p + offLogicFighter);
+            if (pLogicFighter) {
+                size_t offPos = Get_LogicEntity_Position_Offset();
+                if (offPos != 0) {
+                    int vx = ReadInt32(pLogicFighter + offPos);
+                    int vy = ReadInt32(pLogicFighter + offPos + 4);
+                    int vz = ReadInt32(pLogicFighter + offPos + 8);
+                    // VInt3 scaled by 1000 in MLBB (not 10000 — coba dua skala)
+                    float scale = 1000.0f;
+                    e.pos.x = (float)vx / scale;
+                    e.pos.y = (float)vy / scale;
+                    e.pos.z = (float)vz / scale;
+                    if (vx != 0 || vz != 0) posFound = true;
+                }
+            }
+        }
+    }
+
+    // ── Metode 3: Field posisi langsung (fallback, bisa stale) ──
     if (!posFound) {
         e.pos.x = ReadFloat(p + OFF_POS_X);
         e.pos.y = ReadFloat(p + OFF_POS_Y);
