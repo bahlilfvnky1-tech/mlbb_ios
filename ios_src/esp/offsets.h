@@ -127,8 +127,24 @@ inline void* Get_ShowEntity_get_position() {
     // Coba semua varian nama (iOS IL2CPP case-sensitive)
     method = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "ShowEntity", "get_Position", 0);
     if (!method) method = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "ShowEntity", "get_position", 0);
-    if (!method) method = Il2CppGetMethodOffset("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_transform", 0);
     return method;
+}
+
+// ---- Unity Screen resolution (game render resolution, bukan device resolution) ----
+inline int GetUnityScreenWidth() {
+    static void* fn = nullptr;
+    if (!fn) fn = Il2CppGetMethodOffset("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_width", 0);
+    if (!fn) fn = Il2CppGetMethodOffset("UnityEngine.dll", "UnityEngine", "Screen", "get_width", 0);
+    if (!fn) return 0;
+    return reinterpret_cast<int(*)()>(fn)();
+}
+
+inline int GetUnityScreenHeight() {
+    static void* fn = nullptr;
+    if (!fn) fn = Il2CppGetMethodOffset("UnityEngine.CoreModule.dll", "UnityEngine", "Screen", "get_height", 0);
+    if (!fn) fn = Il2CppGetMethodOffset("UnityEngine.dll", "UnityEngine", "Screen", "get_height", 0);
+    if (!fn) return 0;
+    return reinterpret_cast<int(*)()>(fn)();
 }
 
 inline size_t Get_SE_LogicFighter_Offset() {

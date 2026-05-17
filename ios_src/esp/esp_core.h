@@ -47,14 +47,30 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
         // Z < 0 berarti objek ada di belakang kamera
         if (result.z < 0.01f) return false;
         
-        // Unity mengembalikan PIXEL coords (Retina), ImGui pakai POINT coords.
-        // Bagi dengan contentScaleFactor agar sesuai koordinat ImGui.
-        // ESPScale = fine-tuner tambahan (default 1.0 = tidak ada koreksi ekstra)
-        float finalScale = g_ContentScaleFactor * (g_ESPCfg.ScreenScale > 0.1f ? g_ESPCfg.ScreenScale : 1.0f);
+        // Unity Camera.WorldToScreenPoint mengembalikan koordinat dalam Unity Screen Pixels.
+        // Unity Screen.width/height = resolusi render game (bisa 720p/1080p, BUKAN resolusi device).
+        // ImGui memakai Point coords (io.DisplaySize) = device points.
+        // Konversi: screen_pt = result_px * (displayPt / unityScreenPx)
+        
+        int unityW = GetUnityScreenWidth();
+        int unityH = GetUnityScreenHeight();
+        
+        float espScale = g_ESPCfg.ScreenScale > 0.1f ? g_ESPCfg.ScreenScale : 1.0f;
+        
+        float scaleX, scaleY;
+        if (unityW > 0 && unityH > 0) {
+            // Pakai rasio Unity screen → ImGui display (paling akurat)
+            scaleX = (float)unityW / (screenW * espScale);
+            scaleY = (float)unityH / (screenH * espScale);
+        } else {
+            // Fallback: pakai contentScaleFactor
+            float cs = g_ContentScaleFactor * espScale;
+            scaleX = scaleY = cs;
+        }
         
         // Unity origin: bottom-left. ImGui origin: top-left.
-        screen.x = (result.x / finalScale) + g_ESPCfg.ScreenOffsetX;
-        screen.y = (screenH - (result.y / finalScale)) + g_ESPCfg.ScreenOffsetY;
+        screen.x = (result.x / scaleX) + g_ESPCfg.ScreenOffsetX;
+        screen.y = (screenH - (result.y / scaleY)) + g_ESPCfg.ScreenOffsetY;
         return true;
     }
     return false;
