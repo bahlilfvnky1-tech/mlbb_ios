@@ -23,7 +23,8 @@ inline void SyncFeatureToESP() {
     g_ESPCfg.ESPSkillCD   = Feature.ESPSkillCD;
     g_ESPCfg.ESPSpellCD   = Feature.ESPSpellCD;
     g_ESPCfg.ScreenScale   = Feature.ESPScale;
-    g_ESPCfg.MinimapESP    = Feature.MinimapIcon; // Minimap aktif = toggle MinimapIcon di menu
+    // g_ESPCfg.MinimapESP dikontrol LANGSUNG dari menu tab Minimap
+    // JANGAN override di sini — akan bikin toggle tidak bisa diubah!
 }
 
 inline void RenderRetriDot() {
@@ -66,15 +67,21 @@ static void* g_MenuLogoTex = nullptr;
 static bool g_MenuLogoLoaded = false;
 
 static ImVec2 menuPos = ImVec2(20, 20);
-static ImVec2 menuSize = ImVec2(480, 320);
-static ImVec2 minSize = ImVec2(400, 250);
-static ImVec2 maxSize = ImVec2(800, 600);
+static ImVec2 menuSize = ImVec2(520, 360);
+static ImVec2 minSize  = ImVec2(440, 300);
+static ImVec2 maxSize  = ImVec2(900, 700);
 
 inline void ShowMenu()
 {
     bFullChecked = true;
     ImGuiIO& io = ImGui::GetIO();
-    io.FontGlobalScale = window_scale;
+    
+    // Set FontGlobalScale hanya saat pertama atau berubah (bukan setiap frame)
+    static float lastWindowScale = -1.0f;
+    if (lastWindowScale != window_scale) {
+        io.FontGlobalScale = window_scale;
+        lastWindowScale = window_scale;
+    }
     
     ApplyDarkAMOLEDTheme();
 
@@ -94,7 +101,7 @@ inline void ShowMenu()
         menuPos = ImGui::GetWindowPos();
         menuSize = ImGui::GetWindowSize();
 
-        const float SIDEBAR_WIDTH = 180.0f;
+        const float SIDEBAR_WIDTH = 140.0f;  // Lebih kecil agar content area lebih luas
         ImGui::BeginChild("sidebar", ImVec2(SIDEBAR_WIDTH, 0), true, ImGuiWindowFlags_NoScrollbar);
         
         static int selectedTab = 0;

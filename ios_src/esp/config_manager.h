@@ -41,6 +41,7 @@ inline void SaveConfig() {
     file << "RetriLitho=" << RetriLitho << "\n";
     file << "RetriPosX=" << RetriPos.x << "\n";
     file << "RetriPosY=" << RetriPos.y << "\n";
+    file << "window_scale=" << window_scale << "\n";
     file.close();
 }
 
@@ -58,7 +59,7 @@ inline void LoadConfig() {
 
         if (key == "AutoLoadSettings") {
             AutoLoadSettings = v;
-            if (!AutoLoadSettings) break;
+            // JANGAN break di sini! Lanjutkan parsing semua key
         }
         else if (key == "ESPLine") Feature.ESPLine = v;
         else if (key == "ESPBox") Feature.ESPBox = v;
@@ -94,6 +95,7 @@ inline void LoadConfig() {
         else if (key == "RetriLitho") RetriLitho = v;
         else if (key == "RetriPosX") RetriPos.x = f;
         else if (key == "RetriPosY") RetriPos.y = f;
+        else if (key == "window_scale") window_scale = (f > 0.4f && f < 2.0f) ? f : 1.0f;
     }
     file.close();
 }

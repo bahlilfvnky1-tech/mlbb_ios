@@ -4,6 +4,8 @@
 #include "game_math.h"
 #include "esp_core.h"
 #include "esp_minimap.h"
+#include <unordered_map>
+#include <cmath>
 #include <string>
 
 inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float screenH) {
@@ -101,30 +103,41 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
 
         DrawMinimapIcon(draw, e.entityId, e.hp, e.hpMax, e.pos, g_Battle.localCamp);
 
-        // --- POSITION SMOOTHING: lerp smoothPos -> pos untuk kurangi jitter ---
-        // Jika posisi berubah sangat besar (>10 unit = teleport/respawn), snap langsung
-        float dx = e.pos.x - e.smoothPos.x;
-        float dy = e.pos.y - e.smoothPos.y;
-        float dz = e.pos.z - e.smoothPos.z;
-        float dist2 = dx*dx + dy*dy + dz*dz;
-        
-        const float LERP_ALPHA = 0.3f; // 0.0 = stuck, 1.0 = no smoothing
-        if (dist2 > 100.0f) { // >10 unit, snap langsung
-            e.smoothPos = e.pos;
+    // --- POSITION SMOOTHING via static map (persistent across SwapBuffers) ---
+    // Key: entity GUID, Value: smoothed world position
+    static std::unordered_map<uint32_t, Vec3> s_SmoothPos;
+    
+    uint32_t eid = e.guid ? e.guid : (uint32_t)e.entityId;
+    auto it = s_SmoothPos.find(eid);
+    
+    Vec3 renderPos;
+    if (it == s_SmoothPos.end()) {
+        // Entity baru: snap langsung
+        renderPos = e.pos;
+        s_SmoothPos[eid] = e.pos;
+    } else {
+        Vec3& sp = it->second;
+        float dx = e.pos.x - sp.x, dy = e.pos.y - sp.y, dz = e.pos.z - sp.z;
+        float d2 = dx*dx + dy*dy + dz*dz;
+        if (d2 > 225.0f) { // >15 unit = teleport/respawn, snap
+            sp = e.pos;
         } else {
-            e.smoothPos.x += (e.pos.x - e.smoothPos.x) * LERP_ALPHA;
-            e.smoothPos.y += (e.pos.y - e.smoothPos.y) * LERP_ALPHA;
-            e.smoothPos.z += (e.pos.z - e.smoothPos.z) * LERP_ALPHA;
+            const float ALPHA = 0.35f;
+            sp.x += dx * ALPHA;
+            sp.y += dy * ALPHA;
+            sp.z += dz * ALPHA;
         }
-        
-        Vec2 rootPosW2S;
-        if(!UnityWorldToScreen(camera, e.smoothPos, rootPosW2S, screenW, screenH)) continue;
+        renderPos = sp;
+    }
+    
+    Vec2 rootPosW2S;
+        if(!UnityWorldToScreen(camera, renderPos, rootPosW2S, screenW, screenH)) continue;
         
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
-        // --- 3D PERSPECTIVE HEIGHT (Lebih Akurat) ---
-        Vec3 headPos3D = e.smoothPos;
-        headPos3D.y += 1.4f; // Tinggi hero di Unity world units (proporsional)
+        // --- 3D PERSPECTIVE HEIGHT ---
+        Vec3 headPos3D = renderPos;
+        headPos3D.y += 1.4f;
         Vec2 headPosW2S;
         ImVec2 HeadPosVec2;
         if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
@@ -136,9 +149,9 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
         }
         
         // baseY dihitung SETELAH box projection → selalu anchor ke bawah box
-        // Ini fix agar health/name/CD tidak "ketarik" saat hero jauh
         float boxHeightForBase = fabs(HeadPosVec2.y - rootPosVec2.y) * 1.15f;
         float baseY = HeadPosVec2.y + boxHeightForBase + 2.0f; // tepat di bawah box
+
 
         // ================== LINE ==================
         if (g_ESPCfg.ESPLine && hasSelf) {
