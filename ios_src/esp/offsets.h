@@ -123,9 +123,11 @@ inline size_t Get_SE_POS_Offset() {
 
 inline void* Get_ShowEntity_get_position() {
     static void* method = nullptr;
-    if (!method) {
-        method = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "ShowEntity", "get_position", 0);
-    }
+    if (method) return method;
+    // Coba semua varian nama (iOS IL2CPP case-sensitive)
+    method = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "ShowEntity", "get_Position", 0);
+    if (!method) method = Il2CppGetMethodOffset("Assembly-CSharp.dll", "", "ShowEntity", "get_position", 0);
+    if (!method) method = Il2CppGetMethodOffset("UnityEngine.CoreModule.dll", "UnityEngine", "Component", "get_transform", 0);
     return method;
 }
 

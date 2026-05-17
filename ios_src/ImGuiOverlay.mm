@@ -214,9 +214,19 @@
         if (!g_Battle.heroes_render.empty()) {
             for (auto& e : g_Battle.heroes_render) {
                 if (e.camp != g_Battle.localCamp && !e.isSelf) {
+                    // Baca m_vCachePosition langsung dari ptr entity untuk verifikasi
+                    float cx=0,cy=0,cz=0;
+                    if (e.ptr) {
+                        size_t cp = Il2CppGetFieldOffset("Assembly-CSharp.dll","","ShowEntity","m_vCachePosition");
+                        if (cp == 0) cp = 0x294;
+                        cx = *(float*)(e.ptr + cp);
+                        cy = *(float*)(e.ptr + cp + 4);
+                        cz = *(float*)(e.ptr + cp + 8);
+                    }
                     snprintf(enemyStr, sizeof(enemyStr),
-                             "\nEnemyPos: %.2f, %.2f, %.2f\nGetPosFn: %p",
+                             "\nEnemyPos: %.2f, %.2f, %.2f\nCachePos: %.2f, %.2f, %.2f\nGetPosFn: %p",
                              e.pos.x, e.pos.y, e.pos.z,
+                             cx, cy, cz,
                              Get_ShowEntity_get_position());
                     break;
                 }
