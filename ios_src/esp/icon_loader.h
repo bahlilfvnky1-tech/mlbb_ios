@@ -79,7 +79,7 @@ static void* CreateMetalTexture(const unsigned char* pngBytes, int pngLen) {
     return (__bridge_retained void*)tex;
 }
 
-static void* LoadTextureFromFile(const char* path) {
+static void* LoadIconTexture_(const char* path) {
     int w = 0, h = 0;
     unsigned char* img = stbi_load(path, &w, &h, nullptr, 4);
     if (!img) return nullptr;
@@ -125,7 +125,7 @@ static void AttachHeroIcons() {
         WriteToFile(path, decoded);
         
         Icon ic;
-        ic.texture = LoadTextureFromFile(path.c_str());
+        ic.texture = LoadIconTexture_(path.c_str());
         ic.IsValid = (ic.texture != nullptr);
         std::remove(path.c_str());
         HeroIcon[i] = ic;
@@ -151,7 +151,7 @@ static void AttachMonsterIcons() {
         WriteToFile(path, decoded);
         
         Icon ic;
-        ic.texture = LoadTextureFromFile(path.c_str());
+        ic.texture = LoadIconTexture_(path.c_str());
         ic.IsValid = (ic.texture != nullptr);
         std::remove(path.c_str());
         MonsterIcon[i] = ic;

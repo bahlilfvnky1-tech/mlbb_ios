@@ -36,9 +36,3 @@ int ICHealthThin = 5;
 bool isTeam = false;
 bool isEnemy = true;
 int selectedOption = 0;
-
-// Dummy implementation for LoadTextureFromFile
-typedef unsigned int GLuint;
-GLuint LoadTextureFromFile(const char* filename) {
-    return 0; // Return 0 (no texture)
-}

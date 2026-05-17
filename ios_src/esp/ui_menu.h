@@ -61,8 +61,8 @@ inline void RenderRetriDot() {
     ImGui::PopStyleVar();
 }
 
-extern GLuint LoadTextureFromFile(const char* filename);
-static GLuint g_MenuLogoTex = 0;
+// Texture logo menu — void* = (__bridge void*)id<MTLTexture> Metal texture
+static void* g_MenuLogoTex = nullptr;
 static bool g_MenuLogoLoaded = false;
 
 static ImVec2 menuPos = ImVec2(20, 20);

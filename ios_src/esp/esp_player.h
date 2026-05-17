@@ -214,14 +214,14 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
 
         // ================== HERO ICON (OVERLAY) ==================
         if (g_ESPCfg.ESPHero) {
-            GLuint tex = GetHeroIcon(e.entityId);
-            if (tex != 0) {
+            void* tex = GetHeroIcon(e.entityId);  // MTLTexture* via __bridge
+            if (tex != nullptr) {
                 float iconSize = 48.0f / CurrentFOVScale;
                 float halfSize = iconSize / 2.0f;
                 ImVec2 iconMin = ImVec2(rootPosVec2.x - halfSize, baseY);
                 ImVec2 iconMax = ImVec2(rootPosVec2.x + halfSize, baseY + iconSize);
                 
-                draw->AddImageRounded((void*)(intptr_t)tex, iconMin, iconMax, ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 255), 6.0f);
+                draw->AddImageRounded(tex, iconMin, iconMax, ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 255), 6.0f);
                 draw->AddRect(iconMin, iconMax, IM_COL32(255, 255, 255, 180), 6.0f, 0, 1.5f);
                 
                 baseY += iconSize + (8.0f / CurrentFOVScale);
