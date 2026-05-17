@@ -6,6 +6,7 @@
 #include "esp/ui_menu.h"
 #include "esp/esp_core.h"
 #include "esp/esp_player.h"
+#include "esp/esp_minimap.h"
 
 @interface ImGuiOverlay () <MTKViewDelegate>
 @property (nonatomic, strong) MTKView *mtkView;
@@ -96,6 +97,9 @@
     io.FontGlobalScale = 1.0f;
     
     ImGui_ImplMetal_Init(self.device);
+    
+    // Set device untuk icon loader (agar pakai device yang sama, bukan MTLCreateSystemDefaultDevice)
+    SetIconDevice(self.device);
     
     // Konfigurasi IO Display
     io.DisplaySize.x = self.bounds.size.width;
@@ -275,6 +279,11 @@
             // User bisa fine-tune via ESPScale slider jika ESP masih sedikit meleset
             g_ESPCfg.ScreenOffsetX = 0.0f;
             g_ESPCfg.ScreenOffsetY = 0.0f;
+            
+            ImDrawList* bgDraw = ImGui::GetBackgroundDrawList();
+            
+            // --- MINIMAP BORDER (snake glow animation) ---
+            DrawMinimapBorder(bgDraw);
             
             RenderESPCore();
         }
