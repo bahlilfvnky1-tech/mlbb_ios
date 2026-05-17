@@ -60,11 +60,25 @@ void* MemoryThread(void* arg) {
 
 void SetupUI() {
     dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(1.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-        UIWindow *window = [UIApplication sharedApplication].keyWindow;
-        if (!window) {
-            for (UIWindow *w in [UIApplication sharedApplication].windows) {
-                if (w.isKeyWindow) { window = w; break; }
+        UIWindow *window = nil;
+        
+        // iOS 15+: cari window aktif via windowScene
+        #if __IPHONE_OS_VERSION_MAX_ALLOWED >= 150000
+        for (UIWindowScene *scene in [UIApplication sharedApplication].connectedScenes) {
+            if ([scene isKindOfClass:[UIWindowScene class]] &&
+                scene.activationState == UISceneActivationStateForegroundActive) {
+                for (UIWindow *w in scene.windows) {
+                    if (w.isKeyWindow) { window = w; break; }
+                }
+                if (!window) window = scene.windows.firstObject;
+                if (window) break;
             }
+        }
+        #endif
+        
+        // Fallback iOS 13 / 14
+        if (!window) {
+            window = [UIApplication sharedApplication].keyWindow;
         }
         
         if (window) {

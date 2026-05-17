@@ -31,8 +31,7 @@ struct FeatureState {
     bool ESPMName = false;
     bool ESPSkillCD = true;
     bool ESPSpellCD = true;
-    float ESPOffsetX = 0.0f;
-    float ESPOffsetY = -30.0f;
+    // ESPOffsetX / ESPOffsetY dihapus — auto-detect dari safe area iOS
     float ESPScale = 1.0f;
 };
 extern FeatureState Feature;
@@ -69,10 +68,11 @@ struct EspConfig {
     int MinimapSize = 274;
     int MinimapIconSize = 32;
     
-    // Screen Offsets untuk ESP (Kompensasi Safe Area / Notch iOS)
+    // Screen Offsets — dikontrol penuh oleh auto-detect safe area iOS (notch/Dynamic Island)
+    // Nilai di sini hanya SEMENTARA per-frame, tidak boleh disimpan/dimuat dari config
     float ScreenOffsetX = 0.0f;
-    float ScreenOffsetY = -30.0f; // -30.0f karena secara default m_vCachePosition adalah posisi kaki
-    float ScreenScale = 1.0f; // Skala (jika layar iPhone menggunakan Retina scale yang beda)
+    float ScreenOffsetY = 0.0f; // 0.0f baseline; safeArea.top ditambahkan tiap frame oleh ImGuiOverlay.mm
+    float ScreenScale = 1.0f;
 };
 extern EspConfig g_ESPCfg;
 

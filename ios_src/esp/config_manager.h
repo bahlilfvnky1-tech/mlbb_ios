@@ -4,7 +4,7 @@
 #include <string>
 
 inline void SaveConfig() {
-    std::ofstream file("/sdcard/Download/mlbb_esp_config.ini");
+    std::ofstream file("/var/mobile/Documents/mlbb_esp_config.ini");
     if (!file.is_open()) return;
     file << "AutoLoadSettings=" << AutoLoadSettings << "\n";
     file << "ESPLine=" << Feature.ESPLine << "\n";
@@ -23,6 +23,8 @@ inline void SaveConfig() {
     file << "ESPMName=" << Feature.ESPMName << "\n";
     file << "ESPSkillCD=" << Feature.ESPSkillCD << "\n";
     file << "ESPSpellCD=" << Feature.ESPSpellCD << "\n";
+    // ESPScale disimpan (ESPOffsetX/Y tidak disimpan — auto-detect dari safe area iOS)
+    file << "ESPScale=" << Feature.ESPScale << "\n";
     
     file << "MinimapESP=" << g_ESPCfg.MinimapESP << "\n";
     file << "MinimapHideBackground=" << g_ESPCfg.MinimapHideBackground << "\n";
@@ -43,7 +45,7 @@ inline void SaveConfig() {
 }
 
 inline void LoadConfig() {
-    std::ifstream file("/sdcard/Download/mlbb_esp_config.ini");
+    std::ifstream file("/var/mobile/Documents/mlbb_esp_config.ini");
     if (!file.is_open()) return;
     std::string line;
     while (std::getline(file, line)) {
@@ -74,6 +76,8 @@ inline void LoadConfig() {
         else if (key == "ESPMName") Feature.ESPMName = v;
         else if (key == "ESPSkillCD") Feature.ESPSkillCD = v;
         else if (key == "ESPSpellCD") Feature.ESPSpellCD = v;
+        // ESPScale dimuat (ESPOffsetX/Y tidak dimuat — auto-detect dari safe area iOS)
+        else if (key == "ESPScale") Feature.ESPScale = f;
         
         else if (key == "MinimapESP") g_ESPCfg.MinimapESP = v;
         else if (key == "MinimapHideBackground") g_ESPCfg.MinimapHideBackground = v;

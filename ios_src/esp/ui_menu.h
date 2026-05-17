@@ -22,9 +22,9 @@ inline void SyncFeatureToESP() {
     g_ESPCfg.ESPMName     = Feature.ESPMName;
     g_ESPCfg.ESPSkillCD   = Feature.ESPSkillCD;
     g_ESPCfg.ESPSpellCD   = Feature.ESPSpellCD;
-    g_ESPCfg.ScreenOffsetX = Feature.ESPOffsetX;
-    g_ESPCfg.ScreenOffsetY = Feature.ESPOffsetY;
     g_ESPCfg.ScreenScale   = Feature.ESPScale;
+    // ScreenOffsetX / ScreenOffsetY TIDAK di-sync dari Feature
+    // — nilai ini diisi tiap frame oleh deteksi safeArea di ImGuiOverlay.mm
 }
 
 inline void RenderRetriDot() {
@@ -227,10 +227,8 @@ inline void ShowMenu()
             ImGui::Spacing();
             
             ImGui::TextColored(ACCENT_RED, "ESP Screen Alignment");
-            ModernSlider("X Offset (Notch)", &Feature.ESPOffsetX, -200.0f, 200.0f, "%.1f");
-            ModernSlider("Y Offset (Height)", &Feature.ESPOffsetY, -200.0f, 200.0f, "%.1f");
             ModernSlider("Screen Scale", &Feature.ESPScale, 0.5f, 3.0f, "%.2f");
-            ImGui::TextWrapped("Gunakan offset & scale ini untuk menggeser/menyesuaikan ESP jika kurang pas di body hero.");
+            ImGui::TextWrapped("Screen offset otomatis terdeteksi dari safe area iOS (notch/Dynamic Island).");
             
             ImGui::Spacing();
             ImGui::Separator();
