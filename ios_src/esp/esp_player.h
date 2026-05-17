@@ -17,54 +17,77 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         
         // --- 3D PERSPECTIVE HEIGHT ---
         Vec3 headPos3D = e.pos;
-        headPos3D.y += 1.4f; // Tinggi monster di Unity world units (proporsional)
+        headPos3D.y += 1.4f;
         Vec2 headPosW2S;
         ImVec2 headPosVec2;
         if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
             headPosVec2 = ImVec2(headPosW2S.x, headPosW2S.y);
         } else {
-            headPosVec2 = ImVec2(rootPosW2S.x, rootPosW2S.y - 40.0f);
+            headPosVec2 = ImVec2(rootPosW2S.x, rootPosW2S.y - 30.0f);
         }
         
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
+        // Hitung box dimensions dulu agar baseY bisa anchor ke bawah box
+        float boxHeight = fabs(headPosVec2.y - rootPosVec2.y) * 1.15f;
+        float boxWidth  = boxHeight * 0.8f;
+        ImVec2 vStart   = {headPosVec2.x - boxWidth/2, headPosVec2.y};
+        ImVec2 vEnd     = {vStart.x + boxWidth, vStart.y + boxHeight};
+        
+        // baseY: tepat di bawah box
+        float baseY = vEnd.y + 2.0f;
+
+        // ================== MONSTER BOX ==================
+        if (g_ESPCfg.ESPMBox) {
+            draw->AddRectFilled(vStart, vEnd, IM_COL32(0, 0, 0, 40), 2);
+            draw->AddRect(vStart, vEnd, IM_COL32(160, 32, 240, 220), 2, 0, 2.0f);
+        }
+        
         // ================== MONSTER ROUND / ICON ==================
         if (g_ESPCfg.ESPMRound) {
-            float circleRadius = 6.0f / CurrentFOVScale;
+            float circleRadius = 5.0f;
             draw->AddCircleFilled(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(160, 32, 240, 200));
-            draw->AddCircle(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
+            draw->AddCircle(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(255, 255, 255, 200), 0, 1.5f);
         }
         
         // ================== MONSTER NAME ==================
         if (g_ESPCfg.ESPMName && e.name.length() > 0) {
-            float fontSize = 16.0f / CurrentFOVScale;
+            float fontSize = 13.0f;
             auto textSize = ImGui::CalcTextSize(e.name.c_str());
             float scaledTextWidth = (textSize.x * fontSize) / ImGui::GetFontSize();
-            
-            ImVec2 textPos = {rootPosVec2.x - (scaledTextWidth / 2), headPosVec2.y - 15.0f};
-            draw->AddText(NULL, fontSize, ImVec2(textPos.x + 1.0f, textPos.y + 1.0f), IM_COL32(0, 0, 0, 240), e.name.c_str());
+            ImVec2 textPos = {rootPosVec2.x - (scaledTextWidth / 2), baseY};
+            draw->AddText(NULL, fontSize, ImVec2(textPos.x+1, textPos.y+1), IM_COL32(0,0,0,240), e.name.c_str());
             draw->AddText(NULL, fontSize, textPos, IM_COL32(255, 255, 255, 255), e.name.c_str());
+            baseY += (textSize.y * fontSize / ImGui::GetFontSize()) + 2.0f;
         }
 
         // ================== MONSTER HEALTH ==================
-        if (g_ESPCfg.ESPMHealth) {
+        if (g_ESPCfg.ESPMHealth && e.hpMax > 0) {
             float healthPercent = (float)e.hp / (float)e.hpMax;
             ImU32 healthColor = IM_COL32(50, 255, 50, 255);
             if (healthPercent <= 0.3f) healthColor = IM_COL32(255, 50, 50, 255);
             else if (healthPercent <= 0.5f) healthColor = IM_COL32(255, 200, 50, 255);
             
-            float healthBarWidth = 70.0f / CurrentFOVScale;
-            float healthBarHeight = 10.0f / CurrentFOVScale;
+            float healthBarWidth  = boxWidth > 10.0f ? boxWidth : 50.0f;
+            float healthBarHeight = 6.0f;
             float healthBarX = rootPosVec2.x - (healthBarWidth / 2);
-            float baseY = rootPosVec2.y - 15 / CurrentFOVScale;
             
-            ImVec2 bgStart = {healthBarX, baseY};
-            ImVec2 bgEnd = {healthBarX + healthBarWidth, baseY + healthBarHeight};
-            ImVec2 healthEnd = {healthBarX + (healthBarWidth * healthPercent), baseY + healthBarHeight};
+            ImVec2 bgStart    = {healthBarX, baseY};
+            ImVec2 bgEnd      = {healthBarX + healthBarWidth, baseY + healthBarHeight};
+            ImVec2 healthEnd  = {healthBarX + (healthBarWidth * healthPercent), baseY + healthBarHeight};
             
             draw->AddRectFilled(bgStart, bgEnd, IM_COL32(0, 0, 0, 200), 2);
             draw->AddRectFilled(bgStart, healthEnd, healthColor, 2);
-            draw->AddRect(bgStart, bgEnd, IM_COL32(255, 255, 255, 150), 2, 0, 1.0f);
+            draw->AddRect(bgStart, bgEnd, IM_COL32(255, 255, 255, 120), 2, 0, 1.0f);
+            
+            // HP text
+            std::string hpText = std::to_string(e.hp) + "/" + std::to_string(e.hpMax);
+            float hpFontSize = 11.0f;
+            auto hpSz = ImGui::CalcTextSize(hpText.c_str());
+            float hpTw = (hpSz.x * hpFontSize) / ImGui::GetFontSize();
+            ImVec2 hpPos = {rootPosVec2.x - hpTw/2, baseY + 1.0f};
+            draw->AddText(NULL, hpFontSize, ImVec2(hpPos.x+1, hpPos.y+1), IM_COL32(0,0,0,255), hpText.c_str());
+            draw->AddText(NULL, hpFontSize, hpPos, IM_COL32(255, 255, 255, 255), hpText.c_str());
         }
     }
 }
@@ -97,7 +120,10 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
             HeadPosVec2 = ImVec2(rootPosVec2.x, rootPosVec2.y - dynamicOffset);
         }
         
-        float baseY = rootPosVec2.y + (20.0f / CurrentFOVScale);
+        // baseY dihitung SETELAH box projection → selalu anchor ke bawah box
+        // Ini fix agar health/name/CD tidak "ketarik" saat hero jauh
+        float boxHeightForBase = fabs(HeadPosVec2.y - rootPosVec2.y) * 1.15f;
+        float baseY = HeadPosVec2.y + boxHeightForBase + 2.0f; // tepat di bawah box
 
         // ================== LINE ==================
         if (g_ESPCfg.ESPLine && hasSelf) {

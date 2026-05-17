@@ -23,8 +23,7 @@ inline void SyncFeatureToESP() {
     g_ESPCfg.ESPSkillCD   = Feature.ESPSkillCD;
     g_ESPCfg.ESPSpellCD   = Feature.ESPSpellCD;
     g_ESPCfg.ScreenScale   = Feature.ESPScale;
-    // ScreenOffsetX / ScreenOffsetY TIDAK di-sync dari Feature
-    // — nilai ini diisi tiap frame oleh deteksi safeArea di ImGuiOverlay.mm
+    g_ESPCfg.MinimapESP    = Feature.MinimapIcon; // Minimap aktif = toggle MinimapIcon di menu
 }
 
 inline void RenderRetriDot() {
