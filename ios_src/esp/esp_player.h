@@ -17,7 +17,7 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         
         // --- 3D PERSPECTIVE HEIGHT ---
         Vec3 headPos3D = e.pos;
-        headPos3D.y += 1.0f; // Tinggi rata-rata monster lebih pendek
+        headPos3D.y += 0.8f; // Tinggi rata-rata monster di Unity world units
         Vec2 headPosW2S;
         ImVec2 headPosVec2;
         if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
@@ -29,7 +29,7 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
         // ================== MONSTER ROUND / ICON ==================
-        float circleRadius = 10.0f / CurrentFOVScale;
+        float circleRadius = 6.0f / CurrentFOVScale;
         draw->AddCircleFilled(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(160, 32, 240, 200));
         draw->AddCircle(ImVec2(rootPosVec2.x, headPosVec2.y), circleRadius, IM_COL32(255, 255, 255, 255), 0, 1.5f);
         
@@ -50,8 +50,8 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         if (healthPercent <= 0.3f) healthColor = IM_COL32(255, 50, 50, 255);
         else if (healthPercent <= 0.5f) healthColor = IM_COL32(255, 200, 50, 255);
         
-        float healthBarWidth = 40.0f / CurrentFOVScale;
-        float healthBarHeight = 6.0f / CurrentFOVScale;
+        float healthBarWidth = 70.0f / CurrentFOVScale;
+        float healthBarHeight = 10.0f / CurrentFOVScale;
         float healthBarX = rootPosVec2.x - (healthBarWidth / 2);
         float baseY = rootPosVec2.y - 15 / CurrentFOVScale;
         
@@ -82,7 +82,7 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
         
         // --- 3D PERSPECTIVE HEIGHT (Lebih Akurat) ---
         Vec3 headPos3D = e.pos;
-        headPos3D.y += 1.8f; // Tinggi rata-rata hero di Unity
+        headPos3D.y += 0.8f; // Tinggi rata-rata hero di Unity world units
         Vec2 headPosW2S;
         ImVec2 HeadPosVec2;
         if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
@@ -93,7 +93,7 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
             HeadPosVec2 = ImVec2(rootPosVec2.x, rootPosVec2.y - dynamicOffset);
         }
         
-        float baseY = rootPosVec2.y + (55.0f / CurrentFOVScale);
+        float baseY = rootPosVec2.y + (20.0f / CurrentFOVScale);
 
         // ================== LINE ==================
         if (g_ESPCfg.ESPLine && hasSelf) {
@@ -138,9 +138,8 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
 
         // ================== HEALTH BAR ==================
         if (g_ESPCfg.ESPHealth) {
-            float baseHealthBarWidth = 160.0f;
-            float healthBarWidth = baseHealthBarWidth / CurrentFOVScale;
-            float healthBarHeight = 24.0f / CurrentFOVScale;
+            float healthBarWidth = 70.0f / CurrentFOVScale;
+            float healthBarHeight = 12.0f / CurrentFOVScale;
             
             float healthBarX = rootPosVec2.x - (healthBarWidth / 2);
             ImVec2 bgStart = {healthBarX, baseY};
