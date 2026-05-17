@@ -9,6 +9,8 @@ std::string tittle = "MLBB Internal iOS";
 std::string toastsaveload = "";
 int screenWidth = 0;
 int screenHeight = 0;
+float g_ContentScaleFactor = 2.0f; // default 2x Retina, di-update tiap frame dari ImGuiOverlay
+float g_SafeAreaTop = 0.0f;        // di-update tiap frame dari ImGuiOverlay
 
 FeatureState Feature;
 EspConfig g_ESPCfg;

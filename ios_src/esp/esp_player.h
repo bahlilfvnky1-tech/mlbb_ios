@@ -13,14 +13,14 @@ inline void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float 
         if (e.isDead || e.hp <= 0) continue;
 
         Vec2 rootPosW2S;
-        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenH)) continue;
+        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenW, screenH)) continue;
         
         // --- 3D PERSPECTIVE HEIGHT ---
         Vec3 headPos3D = e.pos;
         headPos3D.y += 1.0f; // Tinggi rata-rata monster lebih pendek
         Vec2 headPosW2S;
         ImVec2 headPosVec2;
-        if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenH)) {
+        if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
             headPosVec2 = ImVec2(headPosW2S.x, headPosW2S.y);
         } else {
             headPosVec2 = ImVec2(rootPosW2S.x, rootPosW2S.y - 40.0f);
@@ -76,7 +76,7 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
 
         Vec2 rootPosW2S;
         // Gunakan UnityWorldToScreen yang memanggil Camera.WorldToScreenPoint via Il2Cpp
-        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenH)) continue;
+        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenW, screenH)) continue;
         
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
@@ -85,7 +85,7 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
         headPos3D.y += 1.8f; // Tinggi rata-rata hero di Unity
         Vec2 headPosW2S;
         ImVec2 HeadPosVec2;
-        if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenH)) {
+        if(UnityWorldToScreen(camera, headPos3D, headPosW2S, screenW, screenH)) {
             HeadPosVec2 = ImVec2(headPosW2S.x, headPosW2S.y);
         } else {
             // Fallback

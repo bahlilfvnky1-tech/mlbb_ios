@@ -11,6 +11,8 @@ extern std::string tittle;
 extern std::string toastsaveload;
 extern int screenWidth;
 extern int screenHeight;
+extern float g_ContentScaleFactor; // view.contentScaleFactor (2.0 / 3.0 Retina)
+extern float g_SafeAreaTop;        // safeArea.top dalam points (notch/Dynamic Island)
 
 struct FeatureState {
     bool MinimapIcon = true;

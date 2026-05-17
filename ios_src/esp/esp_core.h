@@ -30,7 +30,7 @@ inline void* GetCameraMain() {
 
 
 
-inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, float screenH) {
+inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, float screenW, float screenH) {
     if (!camera) return false;
     
     static void* w2s_method = nullptr;
@@ -42,18 +42,19 @@ inline bool UnityWorldToScreen(void* camera, const Vec3& world, Vec2& screen, fl
     }
     if (w2s_method) {
         UnityVector3 inWorld = { world.x, world.y, world.z };
-        // Panggil method asli dari Unity Engine
         UnityVector3 result = reinterpret_cast<UnityVector3(*)(void*, UnityVector3)>(w2s_method)(camera, inWorld);
         
         // Z < 0 berarti objek ada di belakang kamera
-        if (result.z < 0.01f) return false; 
+        if (result.z < 0.01f) return false;
         
-        // Terapkan Scaling
-        float scale = g_ESPCfg.ScreenScale > 0.1f ? g_ESPCfg.ScreenScale : 1.0f;
-        screen.x = (result.x / scale) + g_ESPCfg.ScreenOffsetX;
+        // Unity mengembalikan PIXEL coords (Retina), ImGui pakai POINT coords.
+        // Bagi dengan contentScaleFactor agar sesuai koordinat ImGui.
+        // ESPScale = fine-tuner tambahan (default 1.0 = tidak ada koreksi ekstra)
+        float finalScale = g_ContentScaleFactor * (g_ESPCfg.ScreenScale > 0.1f ? g_ESPCfg.ScreenScale : 1.0f);
         
-        // ImGui menggunakan Top-Left (0,0), sedangkan Unity menggunakan Bottom-Left (0,0)
-        screen.y = (screenH - (result.y / scale)) + g_ESPCfg.ScreenOffsetY; 
+        // Unity origin: bottom-left. ImGui origin: top-left.
+        screen.x = (result.x / finalScale) + g_ESPCfg.ScreenOffsetX;
+        screen.y = (screenH - (result.y / finalScale)) + g_ESPCfg.ScreenOffsetY;
         return true;
     }
     return false;
