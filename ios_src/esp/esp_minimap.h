@@ -48,7 +48,7 @@ inline void DrawMinimapIcon(ImDrawList* draw, int entityId, int hp, int hpMax, c
     if (!g_ESPCfg.MinimapESP) return;
 
     Vec2 minimapPos = WorldToMinimap(localCamp, pos, g_ESPCfg.MinimapSize, g_ESPCfg.MinimapPosX, g_ESPCfg.MinimapPosY);
-    GLuint tex = GetHeroIcon(entityId);
+    void* tex = GetHeroIcon(entityId);
     
     float iconSize = g_ESPCfg.MinimapIconSize;
     float iconHalfSize = iconSize / 2.0f;
@@ -57,8 +57,8 @@ inline void DrawMinimapIcon(ImDrawList* draw, int entityId, int hp, int hpMax, c
     ImVec2 mMin = ImVec2(center.x - iconHalfSize, center.y - iconHalfSize);
     ImVec2 mMax = ImVec2(center.x + iconHalfSize, center.y + iconHalfSize);
     
-    if (tex != 0) {
-        draw->AddImageRounded((void*)(intptr_t)tex, mMin, mMax, ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255,255,255,255), iconSize);
+    if (tex != nullptr) {
+        draw->AddImageRounded(tex, mMin, mMax, ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255,255,255,255), iconSize);
         
         float a_max = 3.14159265359f * 2.0f;
         float radius = iconHalfSize;

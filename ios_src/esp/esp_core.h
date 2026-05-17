@@ -2,20 +2,20 @@
 #include "imgui.h"
 #include "config.h"
 #include "game_math.h"
-#include "icon_loader.h"   // Sistem icon: base64 -> stb_image -> GL texture
+#include "icon_loader.h"   // Sistem icon: base64 -> stb_image -> MTLTexture
 
-// GetHeroIcon: wrapper ke ICTexture() dari IconList.h
-inline GLuint GetHeroIcon(int heroId) {
-    if (HeroIcon.empty()) return 0;
+// GetHeroIcon: void* = (__bridge void*)id<MTLTexture> untuk Metal ImGui backend
+inline void* GetHeroIcon(int heroId) {
+    if (HeroIcon.empty()) return nullptr;
     auto ic = ICTexture(heroId);
-    return ic.IsValid ? ic.texture : 0;
+    return ic.IsValid ? ic.texture : nullptr;
 }
 
-// GetMonsterIcon: wrapper ke MonsterTexture() dari IconList.h
-inline GLuint GetMonsterIcon(int monsterId) {
-    if (MonsterIcon.empty()) return 0;
+// GetMonsterIcon: void* = (__bridge void*)id<MTLTexture>
+inline void* GetMonsterIcon(int monsterId) {
+    if (MonsterIcon.empty()) return nullptr;
     auto ic = MonsterTexture(monsterId);
-    return ic.IsValid ? ic.texture : 0;
+    return ic.IsValid ? ic.texture : nullptr;
 }
 
 // ============================================================

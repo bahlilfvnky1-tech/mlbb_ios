@@ -1,12 +1,13 @@
 #pragma once
 #include <vector>
+#include <string>
 #include "ICON.h"
 #include "MonsterIcon.h"
 
-typedef unsigned int GLuint;
-
+// Icon struct: texture = (__bridge_retained void*)id<MTLTexture>
+// ImGui Metal backend: AddImage((void*)texture, ...)
 struct Icon {
-    GLuint texture = 0;
+    void* texture = nullptr;  // MTLTexture via __bridge_retained
     int width = 0;
     int height = 0;
     bool IsValid = false;
