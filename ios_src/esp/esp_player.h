@@ -101,14 +101,29 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
 
         DrawMinimapIcon(draw, e.entityId, e.hp, e.hpMax, e.pos, g_Battle.localCamp);
 
+        // --- POSITION SMOOTHING: lerp smoothPos -> pos untuk kurangi jitter ---
+        // Jika posisi berubah sangat besar (>10 unit = teleport/respawn), snap langsung
+        float dx = e.pos.x - e.smoothPos.x;
+        float dy = e.pos.y - e.smoothPos.y;
+        float dz = e.pos.z - e.smoothPos.z;
+        float dist2 = dx*dx + dy*dy + dz*dz;
+        
+        const float LERP_ALPHA = 0.3f; // 0.0 = stuck, 1.0 = no smoothing
+        if (dist2 > 100.0f) { // >10 unit, snap langsung
+            e.smoothPos = e.pos;
+        } else {
+            e.smoothPos.x += (e.pos.x - e.smoothPos.x) * LERP_ALPHA;
+            e.smoothPos.y += (e.pos.y - e.smoothPos.y) * LERP_ALPHA;
+            e.smoothPos.z += (e.pos.z - e.smoothPos.z) * LERP_ALPHA;
+        }
+        
         Vec2 rootPosW2S;
-        // Gunakan UnityWorldToScreen yang memanggil Camera.WorldToScreenPoint via Il2Cpp
-        if(!UnityWorldToScreen(camera, e.pos, rootPosW2S, screenW, screenH)) continue;
+        if(!UnityWorldToScreen(camera, e.smoothPos, rootPosW2S, screenW, screenH)) continue;
         
         ImVec2 rootPosVec2(rootPosW2S.x, rootPosW2S.y);
         
         // --- 3D PERSPECTIVE HEIGHT (Lebih Akurat) ---
-        Vec3 headPos3D = e.pos;
+        Vec3 headPos3D = e.smoothPos;
         headPos3D.y += 1.4f; // Tinggi hero di Unity world units (proporsional)
         Vec2 headPosW2S;
         ImVec2 HeadPosVec2;
@@ -216,15 +231,15 @@ inline void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float s
         if (g_ESPCfg.ESPHero) {
             void* tex = GetHeroIcon(e.entityId);  // MTLTexture* via __bridge
             if (tex != nullptr) {
-                float iconSize = 48.0f / CurrentFOVScale;
+                float iconSize = 24.0f; // Ukuran tetap, tidak scale dengan FOV
                 float halfSize = iconSize / 2.0f;
                 ImVec2 iconMin = ImVec2(rootPosVec2.x - halfSize, baseY);
                 ImVec2 iconMax = ImVec2(rootPosVec2.x + halfSize, baseY + iconSize);
                 
-                draw->AddImageRounded(tex, iconMin, iconMax, ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 255), 6.0f);
-                draw->AddRect(iconMin, iconMax, IM_COL32(255, 255, 255, 180), 6.0f, 0, 1.5f);
+                draw->AddImageRounded(tex, iconMin, iconMax, ImVec2(0, 0), ImVec2(1, 1), IM_COL32(255, 255, 255, 230), 4.0f);
+                draw->AddRect(iconMin, iconMax, IM_COL32(255, 255, 255, 150), 4.0f, 0, 1.0f);
                 
-                baseY += iconSize + (8.0f / CurrentFOVScale);
+                baseY += iconSize + 4.0f;
             }
         }
 

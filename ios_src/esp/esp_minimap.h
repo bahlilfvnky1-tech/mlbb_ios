@@ -68,8 +68,9 @@ inline void DrawMinimapIcon(ImDrawList* draw, int entityId, int hp, int hpMax, c
         if (healthPercent <= 0.3f) healthColor = IM_COL32(255, 50, 50, 255);
         else if (healthPercent <= 0.5f) healthColor = IM_COL32(255, 200, 50, 255);
         
+        float arcThickness = fmaxf(1.5f, iconSize * 0.08f); // proporsional, min 1.5pt
         draw->PathArcTo(center, radius, -(a_max / 4.0f) + (a_max / hpMax) * (hpMax - hp), a_max - (a_max / 4.0f));
-        draw->PathStroke(healthColor, ImDrawFlags_None, 3.0f);
+        draw->PathStroke(healthColor, ImDrawFlags_None, arcThickness);
     } else {
         draw->AddCircleFilled(center, 8.0f, IM_COL32(255, 0, 0, 255));
         draw->AddCircle(center, 8.0f, IM_COL32(0, 0, 0, 255), 0, 1.5f);

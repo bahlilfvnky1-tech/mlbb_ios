@@ -240,19 +240,19 @@
         
         std::string finalDebugStr = std::string(debugStr) + extraStr + enemyStr;
         ImGui::GetBackgroundDrawList()->AddText(ImVec2(50, 50), IM_COL32(0, 255, 0, 255), finalDebugStr.c_str());
+        ImDrawList* bgDraw = ImGui::GetBackgroundDrawList();
+        
+        // --- MINIMAP BORDER (snake glow) — aktif SELALU saat MinimapESP=true, tidak perlu dalam match ---
+        DrawMinimapBorder(bgDraw);
+        
         // Panggil ESP Core (hanya jika fitur aktif)
         if (g_Battle.isValid) {
             SyncFeatureToESP();
             
             // --- UPDATE SCALE FACTOR (otomatis dari sistem iOS) ---
-            // g_ContentScaleFactor dipakai di W2S untuk konversi pixel→point (Retina)
             g_ContentScaleFactor = view.contentScaleFactor;
             
-            // --- SAFE AREA INFO (disimpan untuk debug, TIDAK dipakai di W2S) ---
-            // Game MLBB merender full-screen; Camera.WorldToScreenPoint sudah
-            // mengembalikan koordinat relatif ke full screen (pixel). W2S membaginya
-            // dengan contentScaleFactor sehingga sudah cocok dengan koordinat ImGui (point).
-            // safeArea hanya relevan untuk posisi elemen HUD native, bukan ESP overlay.
+            // --- SAFE AREA INFO ---
             UIEdgeInsets safeArea = UIEdgeInsetsZero;
             UIWindow *mainWindow = self.window;
             
@@ -274,16 +274,8 @@
             if (mainWindow) safeArea = mainWindow.safeAreaInsets;
             
             g_SafeAreaTop = (float)safeArea.top;
-            
-            // ScreenOffsetX/Y = 0.0f (auto dari scale)
-            // User bisa fine-tune via ESPScale slider jika ESP masih sedikit meleset
             g_ESPCfg.ScreenOffsetX = 0.0f;
             g_ESPCfg.ScreenOffsetY = 0.0f;
-            
-            ImDrawList* bgDraw = ImGui::GetBackgroundDrawList();
-            
-            // --- MINIMAP BORDER (snake glow animation) ---
-            DrawMinimapBorder(bgDraw);
             
             RenderESPCore();
         }

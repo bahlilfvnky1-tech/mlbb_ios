@@ -56,6 +56,7 @@ struct EntityData {
 
     // Position (world)
     Vec3 pos;
+    Vec3 smoothPos;  // Posisi yang di-smooth untuk menghilangkan jitter ESP
 
     // Position (screen) - filled by WorldToScreen
     Vec2 screenPos;
