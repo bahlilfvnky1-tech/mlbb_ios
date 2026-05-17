@@ -204,9 +204,10 @@
                  g_Battle.monsters_render.size(),
                  g_Battle.localCamp, GetCameraMain());
         char extraStr[256] = "";
-        snprintf(extraStr, sizeof(extraStr), "\nOffLogicF: 0x%zx | OffLogPos: 0x%zx\nOffCacheP: 0x%zx | OffPos: 0x%zx\nLogicEntityFound: %d\nScaleFactor: %.1f | SafeAreaTop: %.0f",
+        snprintf(extraStr, sizeof(extraStr), "\nOffLogicF: 0x%zx | OffLogPos: 0x%zx\nOffCacheP: 0x%zx | OffPos: 0x%zx | PosOff: 0x%zx\nLogicEntityFound: %d\nScaleFactor: %.1f | SafeAreaTop: %.0f",
                  g_Battle.dbg_offLogicFighter, g_Battle.dbg_offLogicPos,
-                 g_Battle.dbg_offCachePos, g_Battle.dbg_offPos, g_Battle.dbg_isLogicEntityFound,
+                 g_Battle.dbg_offCachePos, g_Battle.dbg_offPos, Get_SE_POS_Offset(),
+                 g_Battle.dbg_isLogicEntityFound,
                  g_ContentScaleFactor, g_SafeAreaTop);
         
         char enemyStr[256] = "";

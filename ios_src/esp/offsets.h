@@ -102,10 +102,21 @@ inline size_t Get_SE_HPMAX_Offset() {
 
 inline size_t Get_SE_POS_Offset() {
     static size_t off = 0;
-    if (off == 0) { 
-        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position"); 
-        if (off == 0) off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition");
-        if (off == 0) off = 0x294; 
+    if (off == 0) {
+        // Prioritas 1: field yang dipakai Code Breaker Android (referensi asli)
+        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "<LastPosition>k__BackingField");
+    }
+    if (off == 0) {
+        // Prioritas 2: _Position
+        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "_Position");
+    }
+    if (off == 0) {
+        // Prioritas 3: m_vCachePosition
+        off = Il2CppGetFieldOffset("Assembly-CSharp.dll", "", "ShowEntity", "m_vCachePosition");
+    }
+    if (off == 0) {
+        // Hardcoded fallback
+        off = 0x294;
     }
     return off;
 }
