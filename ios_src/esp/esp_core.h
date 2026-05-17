@@ -1,12 +1,21 @@
 #pragma once
 #include "imgui.h"
 #include "config.h"
+#include "game_math.h"
+#include "icon_loader.h"   // Sistem icon: base64 -> stb_image -> GL texture
 
-typedef unsigned int GLuint;
-
+// GetHeroIcon: wrapper ke ICTexture() dari IconList.h
 inline GLuint GetHeroIcon(int heroId) {
-    // Implementasi dummy: kembalikan 0 jika tidak ada gambar ikon yang dimuat
-    return 0;
+    if (HeroIcon.empty()) return 0;
+    auto ic = ICTexture(heroId);
+    return ic.IsValid ? ic.texture : 0;
+}
+
+// GetMonsterIcon: wrapper ke MonsterTexture() dari IconList.h
+inline GLuint GetMonsterIcon(int monsterId) {
+    if (MonsterIcon.empty()) return 0;
+    auto ic = MonsterTexture(monsterId);
+    return ic.IsValid ? ic.texture : 0;
 }
 
 // ============================================================
@@ -81,6 +90,9 @@ void DrawPlayerESP(ImDrawList* draw, void* camera, float screenW, float screenH,
 void DrawMonsterESP(ImDrawList* draw, void* camera, float screenW, float screenH);
 
 inline void RenderESPCore() {
+    // Load icons sekali saat frame pertama (background thread GL)
+    InitAllIcons();
+    
     // Dapatkan instance Camera.main dari Unity
     void* cameraMain = GetCameraMain();
     
